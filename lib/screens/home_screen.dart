@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: const Text('SolHome'),
+      title: const Text('LokaLivi'),
       actions: [
         IconButton(
           icon: const Icon(Icons.search),

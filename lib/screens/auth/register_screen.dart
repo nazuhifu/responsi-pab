@@ -97,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Join SolHome and start shopping',
+          'Join LokaLivi and start shopping',
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey,

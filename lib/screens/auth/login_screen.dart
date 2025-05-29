@@ -46,8 +46,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
                 _buildPasswordField(),
                 const SizedBox(height: 24),
-                _buildDemoCredentials(),
-                const SizedBox(height: 24),
                 _buildLoginButton(),
                 const SizedBox(height: 16),
                 _buildForgotPassword(),
@@ -87,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Sign in to your SolHome account',
+          'Sign in to your LokaLivi account',
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey,
@@ -141,44 +139,6 @@ class _LoginScreenState extends State<LoginScreen> {
         }
         return null;
       },
-    );
-  }
-
-  Widget _buildDemoCredentials() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Demo Credentials:',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.blue.shade800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Email: demo@solhome.com',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.blue.shade700,
-            ),
-          ),
-          Text(
-            'Password: password',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.blue.shade700,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -245,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Invalid email or password. Try demo@solhome.com / password'),
+            content: Text('Invalid email or password.'),
             backgroundColor: Colors.red,
           ),
         );

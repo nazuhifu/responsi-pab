@@ -54,7 +54,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           const Text(
-            'Welcome to SolHome',
+            'Welcome to LokaLivi',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -206,7 +206,7 @@ class ProfileScreen extends StatelessWidget {
         _buildMenuItem(
           icon: Icons.info_outline,
           title: 'About',
-          subtitle: 'Learn more about SolHome',
+          subtitle: 'Learn more about LokaLivi',
           onTap: () {
             _showAboutDialog(context);
           },
@@ -339,7 +339,7 @@ class ProfileScreen extends StatelessWidget {
   void _showAboutDialog(BuildContext context) {
     showAboutDialog(
       context: context,
-      applicationName: 'SolHome',
+      applicationName: 'LokaLivi',
       applicationVersion: '1.0.0',
       applicationIcon: Container(
         width: 60,
@@ -357,7 +357,7 @@ class ProfileScreen extends StatelessWidget {
       children: [
         const Text('Timeless Furniture for Modern Living'),
         const SizedBox(height: 16),
-        const Text('SolHome brings you handcrafted furniture that blends traditional craftsmanship with contemporary design.'),
+        const Text('LokaLivi brings you handcrafted furniture that blends traditional craftsmanship with contemporary design.'),
       ],
     );
   }

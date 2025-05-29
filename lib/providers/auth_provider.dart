@@ -25,7 +25,7 @@ class AuthProvider with ChangeNotifier {
       _user = User(
         id: '1',
         name: 'Demo User',
-        email: 'demo@solhome.com',
+        email: 'demo@lokalivi.com',
         phone: '+1 (555) 123-4567',
       );
       notifyListeners();
@@ -54,7 +54,7 @@ class AuthProvider with ChangeNotifier {
       await Future.delayed(const Duration(seconds: 2));
 
       // Demo credentials
-      if (email == 'demo@solhome.com' && password == 'password') {
+      if (email == 'demo@lokalivi.com' && password == 'password') {
         _user = User(
           id: '1',
           name: 'Demo User',
