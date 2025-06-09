@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 
 class AuthProvider with ChangeNotifier {
+  final fb_auth.FirebaseAuth _auth = fb_auth.FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   User? _user;
   bool _isLoading = false;
   bool _isFirstTime = true;
@@ -13,23 +18,8 @@ class AuthProvider with ChangeNotifier {
   bool get isFirstTime => _isFirstTime;
 
   AuthProvider() {
-    _loadUserFromStorage();
+    _loadUserFromFirebase();
     _checkFirstTime();
-  }
-
-  Future<void> _loadUserFromStorage() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString('user');
-    if (userJson != null) {
-      // In a real app, you would parse the JSON and create a User object
-      _user = User(
-        id: '1',
-        name: 'Demo User',
-        email: 'demo@lokalivi.com',
-        phone: '+1 (555) 123-4567',
-      );
-      notifyListeners();
-    }
   }
 
   Future<void> _checkFirstTime() async {
@@ -45,79 +35,102 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _loadUserFromFirebase() async {
+    final fbUser = _auth.currentUser;
+    if (fbUser != null) {
+      final doc = await _firestore.collection('users').doc(fbUser.uid).get();
+      if (doc.exists) {
+        _user = User.fromJson(doc.data()!);
+        notifyListeners();
+      }
+    }
+  }
+
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
-
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      final credential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      // Demo credentials
-      if (email == 'demo@lokalivi.com' && password == 'password') {
-        _user = User(
-          id: '1',
-          name: 'Demo User',
-          email: email,
-          phone: '+1 (555) 123-4567',
-        );
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('user', 'demo_user_data');
-
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      } else {
-        _isLoading = false;
-        notifyListeners();
-        return false;
+      final fbUser = credential.user;
+      if (fbUser != null) {
+        final doc = await _firestore.collection('users').doc(fbUser.uid).get();
+        if (doc.exists) {
+          _user = User.fromJson(doc.data()!);
+          notifyListeners();
+          return true;
+        }
       }
+      return false;
     } catch (e) {
+      debugPrint("Login Error: $e");
+      return false;
+    } finally {
       _isLoading = false;
       notifyListeners();
-      return false;
     }
   }
 
   Future<bool> register(String name, String email, String password) async {
     _isLoading = true;
     notifyListeners();
-
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      _user = User(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: name,
+      final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
-        phone: '',
+        password: password,
       );
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user', 'demo_user_data');
+      await credential.user?.updateDisplayName(name);
+      await credential.user?.reload(); // memastikan displayName langsung update
+      final fbUser = _auth.currentUser;
 
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _isLoading = false;
-      notifyListeners();
+      if (fbUser != null) {
+        final newUser = User(
+          id: fbUser.uid,
+          name: name,
+          email: fbUser.email ?? email,
+          phone: fbUser.phoneNumber ?? '',
+          avatar: fbUser.photoURL,
+          createdAt: DateTime.now(),
+        );
+
+        await _firestore.collection('users').doc(newUser.id).set(newUser.toJson());
+
+        _user = newUser;
+        notifyListeners();
+        return true;
+      }
       return false;
+    } catch (e) {
+      debugPrint("Register Error: $e");
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<void> logout() async {
+    await _auth.signOut();
     _user = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('user');
     notifyListeners();
   }
 
   Future<void> updateProfile(String name, String email, String phone) async {
     if (_user != null) {
-      _user = _user!.copyWith(name: name, email: email, phone: phone);
+      await _auth.currentUser?.updateDisplayName(name);
+
+      _user = _user!.copyWith(
+        name: name,
+        email: email,
+        phone: phone,
+      );
+
+      await _firestore.collection('users').doc(_user!.id).update(_user!.toJson());
+
       notifyListeners();
     }
   }
