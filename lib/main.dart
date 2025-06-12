@@ -19,9 +19,11 @@ import 'providers/cart_provider.dart';
 import 'providers/wishlist_provider.dart';
 import 'providers/theme_provider.dart';
 import 'utils/app_theme.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

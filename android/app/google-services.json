@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "800626980503",
+    "project_id": "localivi-ea531",
+    "storage_bucket": "localivi-ea531.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800626980503:android:90ac1908edbe83b7db9bd2",
+        "android_client_info": {
+          "package_name": "com.localivi.localivi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCwK_TMdQxSTsTh0hy86EVtU2icv8gxO4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
