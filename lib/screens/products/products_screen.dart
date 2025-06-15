@@ -29,7 +29,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     try {
       final snapshot = await FirebaseFirestore.instance.collection('products').get();
       final products = snapshot.docs.map((doc) {
-        return Product.fromJson(doc.data());
+        return Product.fromFirestore(doc.data());
       }).toList();
 
       setState(() {
