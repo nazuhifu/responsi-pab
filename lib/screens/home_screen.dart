@@ -357,16 +357,22 @@ Widget _buildCategoriesSection() {
   void _handleNavigation(int index) {
     switch (index) {
       case 0:
-        // Home
+        // Home, tidak perlu navigasi
         break;
       case 1:
-        Navigator.pushNamed(context, '/categories');
+        Navigator.pushNamed(context, '/categories').then((_) {
+          setState(() => _currentIndex = 0);
+        });
         break;
       case 2:
-        Navigator.pushNamed(context, '/wishlist');
+        Navigator.pushNamed(context, '/wishlist').then((_) {
+          setState(() => _currentIndex = 0);
+        });
         break;
       case 3:
-        Navigator.pushNamed(context, '/profile');
+        Navigator.pushNamed(context, '/profile').then((_) {
+          setState(() => _currentIndex = 0);
+        });
         break;
     }
   }
