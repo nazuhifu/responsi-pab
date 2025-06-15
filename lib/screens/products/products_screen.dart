@@ -29,7 +29,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     try {
       final snapshot = await FirebaseFirestore.instance.collection('products').get();
       final products = snapshot.docs.map((doc) {
-        return Product.fromJson(doc.data()); // ensure this method exists
+        return Product.fromJson(doc.data());
       }).toList();
 
       setState(() {
@@ -125,10 +125,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
     return PopupMenuButton<String>(
       icon: const Icon(Icons.sort),
       onSelected: (value) {
-        setState(() {
-          _sortBy = value;
-          _sortProducts();
-        });
+        _sortBy = value;
+        _sortProducts();
       },
       itemBuilder: (context) => [
         const PopupMenuItem(value: 'name', child: Text('Name')),
@@ -143,7 +141,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         int crossAxisCount = (constraints.maxWidth ~/ 200).clamp(2, 4);
-        double childAspectRatio = (constraints.maxWidth / crossAxisCount) / (constraints.maxHeight * 0.6);
+        double childAspectRatio =
+            (constraints.maxWidth / crossAxisCount) / (constraints.maxHeight * 0.6);
 
         return GridView.builder(
           padding: EdgeInsets.all(padding),
@@ -219,10 +218,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ),
             trailing: Text(
               '\$${product.price.toStringAsFixed(0)}',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
+                color: AppTheme.primaryColor,
               ),
             ),
             onTap: () {
