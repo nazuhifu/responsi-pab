@@ -8,6 +8,9 @@ import '../../providers/cart_provider.dart';
 import '../../providers/wishlist_provider.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/review_card.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -281,90 +284,72 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     );
   }
 
-  Widget _buildImageCarousel() {
-    if (_product!.images.isEmpty) {
-      return Container(
-        color: Colors.grey.shade200,
-        child: const Center(
-          child: Icon(
-            Icons.chair,
-            size: 80,
-            color: Colors.grey,
-          ),
+Widget _buildImageCarousel() {
+  if (_product!.images.isEmpty) {
+    return Container(
+      color: Colors.grey.shade200,
+      child: const Center(
+        child: Icon(
+          Icons.chair,
+          size: 80,
+          color: Colors.grey,
         ),
-      );
-    }
-
-    return Stack(
-      children: [
-        CarouselSlider(
-          options: CarouselOptions(
-            height: 300,
-            viewportFraction: 1.0,
-            onPageChanged: (index, reason) {
-              setState(() {
-                _currentImageIndex = index;
-              });
-            },
-          ),
-          items: _product!.images.map((image) {
-            return Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-              ),
-              child: Image.network(
-                image,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return const Center(
-                    child: Icon(
-                      Icons.chair,
-                      size: 80,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
-              ),
-            );
-          }).toList(),
-        ),
-        if (_product!.images.length > 1)
-          Positioned(
-            bottom: 16,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: _product!.images.asMap().entries.map((entry) {
-                return Container(
-                  width: 8,
-                  height: 8,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentImageIndex == entry.key
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.4),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-      ],
+      ),
     );
   }
+
+  return Stack(
+    children: [
+      CarouselSlider(
+        options: CarouselOptions(
+          height: 300,
+          viewportFraction: 1.0,
+          onPageChanged: (index, reason) {
+            setState(() {
+              _currentImageIndex = index;
+            });
+          },
+        ),
+        items: _product!.images.map((imageBase64) {
+          Uint8List imageBytes = base64Decode(imageBase64.split(',').last);
+          return Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+            ),
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.cover,
+            ),
+          );
+        }).toList(),
+      ),
+      if (_product!.images.length > 1)
+        Positioned(
+          bottom: 16,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: _product!.images.asMap().entries.map((entry) {
+              return Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentImageIndex == entry.key
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.4),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+    ],
+  );
+}
+
 
   Widget _buildProductInfo() {
     return Padding(
