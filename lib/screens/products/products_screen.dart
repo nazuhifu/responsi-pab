@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/product_card.dart';
-import '../../data/sample_data.dart';
 import '../../models/product.dart';
+import '../../widgets/product_card.dart';
+import '../../utils/app_theme.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -11,32 +12,52 @@ class ProductsScreen extends StatefulWidget {
 }
 
 class _ProductsScreenState extends State<ProductsScreen> {
-  late List<Product> _products;
-  late List<Product> _filteredProducts;
+  List<Product> _products = [];
+  List<Product> _filteredProducts = [];
   String _selectedCategory = 'All';
   String _sortBy = 'name';
   bool _isGridView = true;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _products = SampleData.allProducts;
-    _filteredProducts = List<Product>.from(_products);
+    _fetchProducts();
+  }
+
+  Future<void> _fetchProducts() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('products').get();
+      final products = snapshot.docs.map((doc) {
+        return Product.fromJson(doc.data());
+      }).toList();
+
+      setState(() {
+        _products = products;
+        _filteredProducts = List<Product>.from(products);
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Gagal ambil produk dari Firebase: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.of(context).size.width * 0.04;
+
     return Scaffold(
       appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          _buildFilters(padding),
-          Expanded(
-            child: _isGridView ? _buildGridView(padding) : _buildListView(padding),
-          ),
-        ],
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                _buildFilters(padding),
+                Expanded(
+                  child: _isGridView ? _buildGridView(padding) : _buildListView(padding),
+                ),
+              ],
+            ),
     );
   }
 
@@ -63,39 +84,40 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Widget _buildFilters(double padding) {
+    final categories = ['All', ..._extractCategories()];
+
     return Padding(
       padding: EdgeInsets.all(padding),
       child: Row(
         children: [
-          Expanded(child: _buildCategoryFilter()),
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              value: _selectedCategory,
+              decoration: const InputDecoration(
+                labelText: 'Category',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              items: categories.map((category) {
+                return DropdownMenuItem(
+                  value: category,
+                  child: Text(category),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedCategory = value;
+                    _filterProducts();
+                  });
+                }
+              },
+            ),
+          ),
           SizedBox(width: padding),
           _buildSortButton(),
         ],
       ),
-    );
-  }
-
-  Widget _buildCategoryFilter() {
-    final categories = ['All', ...SampleData.categories.map((c) => c.name)];
-    return DropdownButtonFormField<String>(
-      value: _selectedCategory,
-      decoration: const InputDecoration(
-        labelText: 'Category',
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      items: categories.map((category) {
-        return DropdownMenuItem(
-          value: category,
-          child: Text(category),
-        );
-      }).toList(),
-      onChanged: (value) {
-        if (value != null) {
-          _selectedCategory = value;
-          _filterProducts();
-        }
-      },
     );
   }
 
@@ -107,22 +129,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
         _sortProducts();
       },
       itemBuilder: (context) => [
-        const PopupMenuItem(
-          value: 'name',
-          child: Text('Name'),
-        ),
-        const PopupMenuItem(
-          value: 'price_low',
-          child: Text('Price: Low to High'),
-        ),
-        const PopupMenuItem(
-          value: 'price_high',
-          child: Text('Price: High to Low'),
-        ),
-        const PopupMenuItem(
-          value: 'rating',
-          child: Text('Rating'),
-        ),
+        const PopupMenuItem(value: 'name', child: Text('Name')),
+        const PopupMenuItem(value: 'price_low', child: Text('Price: Low to High')),
+        const PopupMenuItem(value: 'price_high', child: Text('Price: High to Low')),
+        const PopupMenuItem(value: 'rating', child: Text('Rating')),
       ],
     );
   }
@@ -130,9 +140,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Widget _buildGridView(double padding) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Responsive crossAxisCount
         int crossAxisCount = (constraints.maxWidth ~/ 200).clamp(2, 4);
-        double childAspectRatio = (constraints.maxWidth / crossAxisCount) / (constraints.maxHeight * 0.6);
+        double childAspectRatio =
+            (constraints.maxWidth / crossAxisCount) / (constraints.maxHeight * 0.6);
 
         return GridView.builder(
           padding: EdgeInsets.all(padding),
@@ -183,9 +193,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       child: Image.network(
                         product.images.first,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.chair, color: Colors.grey);
-                        },
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.chair, color: Colors.grey),
                       ),
                     )
                   : const Icon(Icons.chair, color: Colors.grey),
@@ -209,10 +218,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ),
             trailing: Text(
               '\$${product.price.toStringAsFixed(0)}',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
+                color: AppTheme.primaryColor,
               ),
             ),
             onTap: () {
@@ -228,13 +237,18 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
+  List<String> _extractCategories() {
+    final categories = _products.map((p) => p.category).toSet().toList();
+    categories.sort();
+    return categories;
+  }
+
   void _filterProducts() {
     if (_selectedCategory == 'All') {
       _filteredProducts = List<Product>.from(_products);
     } else {
-      _filteredProducts = _products
-          .where((product) => product.category == _selectedCategory)
-          .toList();
+      _filteredProducts =
+          _products.where((product) => product.category == _selectedCategory).toList();
     }
     _sortProducts();
   }

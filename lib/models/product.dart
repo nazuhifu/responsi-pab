@@ -81,19 +81,39 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'],
-      name: json['name'],
-      category: json['category'],
-      price: json['price'].toDouble(),
-      description: json['description'],
-      images: List<String>.from(json['images']),
-      rating: json['rating']?.toDouble() ?? 0.0,
+      id: json['id'].toString(),
+      name: json['name'] ?? '',
+      category: json['category'] ?? '',
+      price: (json['price'] ?? 0).toDouble(),
+      description: json['description'] ?? '',
+      images: List<String>.from(json['images'] ?? []),
+      rating: (json['rating'] ?? 0).toDouble(),
       reviewCount: json['reviewCount'] ?? 0,
       stock: json['stock'] ?? 0,
       features: List<String>.from(json['features'] ?? []),
       specifications: Map<String, String>.from(json['specifications'] ?? {}),
       isInWishlist: json['isInWishlist'] ?? false,
       isInCart: json['isInCart'] ?? false,
+    );
+  }
+
+  /// ✅ Factory ini digunakan saat membaca dari Firebase Firestore
+  factory Product.fromFirestore(Map<String, dynamic> data) {
+    return Product(
+      id: data['id'].toString(),
+      name: data['name'] ?? '',
+      category: data['category'] ?? '',
+      price: (data['price'] ?? 0).toDouble(),
+      description: data['description'] ?? '',
+      images: List<String>.from(data['images'] ?? []),
+      rating: (data['rating'] ?? 0).toDouble(),
+      reviewCount: data['reviewCount'] ?? 0,
+      stock: data['stock'] ?? 0,
+      features: List<String>.from(data['features'] ?? []),
+      specifications: Map<String, dynamic>.from(data['specifications'] ?? {})
+          .map((k, v) => MapEntry(k, v.toString())),
+      isInWishlist: false, // nilai ini bisa diatur di app
+      isInCart: false,     // nilai ini juga
     );
   }
 }

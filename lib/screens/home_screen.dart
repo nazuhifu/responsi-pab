@@ -1,11 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/product_card.dart';
 import '../widgets/category_card.dart';
-import '../data/sample_data.dart';
 import '../utils/app_theme.dart';
+import '../models/category.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,12 +18,47 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  List<Product> _featuredProducts = [];
+  List<String> _categories = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHomeData();
+  }
+
+  Future<void> _loadHomeData() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('products').get();
+
+      final products = snapshot.docs.map((doc) {
+        return Product.fromFirestore(doc.data());
+      }).toList();
+
+      final uniqueCategories = <String>{};
+      for (var p in products) {
+        uniqueCategories.add(p.category);
+      }
+
+      setState(() {
+        _featuredProducts = products.take(6).toList(); // ambil 6 produk teratas
+        _categories = uniqueCategories.toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading home data: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _buildBody(),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _buildBody(),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -167,55 +204,55 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategoriesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
+Widget _buildCategoriesSection() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Categories',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/categories');
+              },
+              child: const Text('View All'),
+            ),
+          ],
+        ),
+      ),
+      SizedBox(
+        height: 120,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Categories',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+          itemCount: _categories.length,
+          itemBuilder: (context, index) {
+            final categoryName = _categories[index];
+            return CategoryCard(
+              category: Category(
+              id: categoryName.toLowerCase().replaceAll(' ', '_'),
+              name: categoryName,
+              description: 'Explore $categoryName products',
+              icon: Icons.category,
+              productCount: 0,
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/categories');
-                },
-                child: const Text('View All'),
-              ),
-            ],
-          ),
+            );
+          },
         ),
-        SizedBox(
-          height: 120,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: SampleData.categories.length,
-            itemBuilder: (context, index) {
-              final category = SampleData.categories[index];
-              return CategoryCard(
-                category: category,
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/products',
-                    arguments: {'category': category.name},
-                  );
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
+
 
   Widget _buildFeaturedProductsSection() {
     return Column(
@@ -247,9 +284,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: SampleData.featuredProducts.length,
+            itemCount: _featuredProducts.length,
             itemBuilder: (context, index) {
-              final product = SampleData.featuredProducts[index];
+              final product = _featuredProducts[index];
               return SizedBox(
                 width: 200,
                 child: ProductCard(
@@ -295,9 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const Text(
                   'On orders over \$100',
-                  style: TextStyle(
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton(
@@ -322,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _handleNavigation(int index) {
     switch (index) {
       case 0:
-        // Already on home
+        // Home
         break;
       case 1:
         Navigator.pushNamed(context, '/categories');
@@ -335,4 +370,11 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
     }
   }
+}
+
+class CategoryData {
+  final String name;
+  final IconData icon;
+
+  CategoryData({required this.name, this.icon = Icons.category});
 }
