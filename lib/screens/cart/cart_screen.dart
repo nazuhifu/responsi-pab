@@ -131,7 +131,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '\$${cart.totalAmount.toStringAsFixed(2)}',
+                  'Rp${cart.totalAmount.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -150,7 +150,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  cart.totalAmount > 100 ? 'Free' : '\$9.99',
+                  cart.totalAmount > 100 ? 'Free' : 'Rp999.000',
                   style: const TextStyle(
                     color: Colors.grey,
                   ),
@@ -169,7 +169,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '\$${_calculateTotal(cart).toStringAsFixed(2)}',
+                  'Rp${_calculateTotal(cart).toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

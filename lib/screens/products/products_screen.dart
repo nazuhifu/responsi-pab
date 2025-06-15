@@ -217,7 +217,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
               ],
             ),
             trailing: Text(
-              '\$${product.price.toStringAsFixed(0)}',
+              'Rp${product.price.toStringAsFixed(0)}',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
