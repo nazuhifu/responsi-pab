@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/utils/formatter.dart';
 import 'package:provider/provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/checkout_step.dart';
+import '../../utils/formatter.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -442,7 +444,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Expanded(
                     child: Text('${item.product.name} x${item.quantity}'),
                   ),
-                  Text('Rp${item.totalPrice.toStringAsFixed(2)}'),
+                  Text(formatRupiah(item.totalPrice)),
                 ],
               ),
             )),
@@ -450,14 +452,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Row(
               children: [
                 const Expanded(child: Text('Subtotal:')),
-                Text('Rp${cart.totalAmount.toStringAsFixed(2)}'),
+                Text(formatRupiah(cart.totalAmount)),
               ],
             ),
             const SizedBox(height: 4),
             Row(
               children: [
                 const Expanded(child: Text('Shipping:')),
-                Text(shipping == 0 ? 'Free' : 'Rp${shipping.toStringAsFixed(2)}'),
+                Text(shipping == 0 ? 'Free' : formatRupiah(shipping)),
               ],
             ),
             const SizedBox(height: 8),
@@ -470,7 +472,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ),
                 Text(
-                  'Rp${total.toStringAsFixed(2)}',
+                  formatRupiah(total),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primaryColor,

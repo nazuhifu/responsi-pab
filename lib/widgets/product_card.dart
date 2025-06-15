@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../utils/formatter.dart';
 import 'dart:convert';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
@@ -147,20 +148,14 @@ class ProductCard extends StatelessWidget {
   Widget _buildCategory() {
     return Text(
       product.category,
-      style: const TextStyle(
-        fontSize: 12,
-        color: Colors.grey,
-      ),
+      style: const TextStyle(fontSize: 12, color: Colors.grey),
     );
   }
 
   Widget _buildName() {
     return Text(
       product.name,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-      ),
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
@@ -171,33 +166,25 @@ class ProductCard extends StatelessWidget {
 
     return Row(
       children: [
-        const Icon(
-          Icons.star,
-          size: 14,
-          color: Colors.amber,
-        ),
+        const Icon(Icons.star, size: 14, color: Colors.amber),
         const SizedBox(width: 4),
         Text(
           product.rating.toStringAsFixed(1),
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
         Text(
           ' (${product.reviewCount})',
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
       ],
     );
   }
 
   Widget _buildPrice() {
+    final formattedPrice = formatRupiah(product.price);
+
     return Text(
-      'Rp${product.price.toStringAsFixed(0)}',
+      formattedPrice,
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,

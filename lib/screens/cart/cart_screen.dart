@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/cart_item_card.dart';
+import '../../utils/formatter.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -131,7 +132,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Rp${cart.totalAmount.toStringAsFixed(2)}',
+                  formatRupiah(cart.totalAmount),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -150,7 +151,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  cart.totalAmount > 100 ? 'Free' : 'Rp999.000',
+                  cart.totalAmount > 1 ? 'Free' : 'Rp99.000',
                   style: const TextStyle(
                     color: Colors.grey,
                   ),
@@ -169,7 +170,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Rp${_calculateTotal(cart).toStringAsFixed(2)}',
+                  formatRupiah(_calculateTotal(cart)),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

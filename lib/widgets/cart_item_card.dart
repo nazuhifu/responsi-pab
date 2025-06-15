@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/cart_item.dart';
 import '../utils/app_theme.dart';
+import '../utils/formatter.dart';
 
 class CartItemCard extends StatelessWidget {
   final CartItem cartItem;
@@ -86,7 +87,7 @@ class CartItemCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Rp${cartItem.product.price.toStringAsFixed(0)} each',
+          formatRupiah(cartItem.product.price),
           style: const TextStyle(
             color: Colors.grey,
             fontSize: 14,
@@ -94,7 +95,7 @@ class CartItemCard extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Rp${cartItem.totalPrice.toStringAsFixed(2)}',
+          formatRupiah(cartItem.totalPrice),
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
