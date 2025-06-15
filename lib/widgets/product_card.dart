@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../utils/app_theme.dart';
+import 'package:intl/intl.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -196,8 +197,10 @@ class ProductCard extends StatelessWidget {
   }
 
   Widget _buildPrice() {
+    final formatter = NumberFormat('#,###', 'id_ID');
+
     return Text(
-      'Rp${product.price.toStringAsFixed(0)}',
+      'Rp${formatter.format(product.price)}',
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,

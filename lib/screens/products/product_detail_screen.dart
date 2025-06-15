@@ -10,6 +10,7 @@ import '../../utils/app_theme.dart';
 import '../../widgets/review_card.dart';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:intl/intl.dart';
 
 
 class ProductDetailScreen extends StatefulWidget {
@@ -396,7 +397,7 @@ Widget _buildImageCarousel() {
           ),
           const SizedBox(height: 16),
           Text(
-            'Rp${_product!.price.toStringAsFixed(0)}',
+            '\$${_product!.price.toStringAsFixed(0)}',
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -675,6 +676,8 @@ Widget _buildImageCarousel() {
   Widget _buildRelatedProducts() {
     if (_relatedProducts.isEmpty) return const SizedBox.shrink();
 
+    final formatter = NumberFormat('#,###', 'id_ID'); // format rupiah
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -772,7 +775,7 @@ Widget _buildImageCarousel() {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Rp${product.price.toStringAsFixed(0)}',
+                                'Rp${formatter.format(product.price)}',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -793,6 +796,7 @@ Widget _buildImageCarousel() {
       ],
     );
   }
+
 
   Widget _buildBottomBar() {
     final isOutOfStock = _product!.stock == 0;
@@ -824,7 +828,7 @@ Widget _buildImageCarousel() {
                   ),
                 ),
                 Text(
-                  'Rp${(_product!.price * _quantity).toStringAsFixed(0)}',
+                  '\$${(_product!.price * _quantity).toStringAsFixed(0)}',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

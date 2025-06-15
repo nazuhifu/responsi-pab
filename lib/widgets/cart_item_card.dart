@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/cart_item.dart';
 import '../utils/app_theme.dart';
+import 'package:intl/intl.dart';
 
 class CartItemCard extends StatelessWidget {
   final CartItem cartItem;
@@ -64,6 +65,8 @@ class CartItemCard extends StatelessWidget {
   }
 
   Widget _buildProductInfo() {
+    final formatter = NumberFormat('#,###', 'id_ID');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -86,7 +89,7 @@ class CartItemCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Rp${cartItem.product.price.toStringAsFixed(0)} each',
+          'Rp${formatter.format(cartItem.product.price)} each',
           style: const TextStyle(
             color: Colors.grey,
             fontSize: 14,
@@ -94,7 +97,7 @@ class CartItemCard extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Rp${cartItem.totalPrice.toStringAsFixed(2)}',
+          'Rp${formatter.format(cartItem.totalPrice)}',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -104,6 +107,7 @@ class CartItemCard extends StatelessWidget {
       ],
     );
   }
+
 
   Widget _buildQuantityControls() {
     return Column(

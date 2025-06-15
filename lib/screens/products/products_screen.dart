@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/product.dart';
 import '../../widgets/product_card.dart';
 import '../../utils/app_theme.dart';
+import 'package:intl/intl.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -172,6 +173,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Widget _buildListView(double padding) {
+    final formatter = NumberFormat('#,###', 'id_ID'); // format harga rupiah
+
     return ListView.builder(
       padding: EdgeInsets.all(padding),
       itemCount: _filteredProducts.length,
@@ -217,7 +220,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
               ],
             ),
             trailing: Text(
-              'Rp${product.price.toStringAsFixed(0)}',
+              'Rp${formatter.format(product.price)}',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
