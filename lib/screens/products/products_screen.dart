@@ -29,12 +29,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
     try {
       final snapshot = await FirebaseFirestore.instance.collection('products').get();
       final products = snapshot.docs.map((doc) {
-        return Product.fromFirestore(doc.data());
+        return Product.fromJson(doc.data()); // ensure this method exists
       }).toList();
 
       setState(() {
         _products = products;
-        _filteredProducts = products;
+        _filteredProducts = List<Product>.from(products);
         _isLoading = false;
       });
     } catch (e) {
@@ -44,15 +44,17 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final padding = MediaQuery.of(context).size.width * 0.04;
+
     return Scaffold(
       appBar: _buildAppBar(),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                _buildFilters(),
+                _buildFilters(padding),
                 Expanded(
-                  child: _isGridView ? _buildGridView() : _buildListView(),
+                  child: _isGridView ? _buildGridView(padding) : _buildListView(padding),
                 ),
               ],
             ),
@@ -81,11 +83,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildFilters(double padding) {
     final categories = ['All', ..._extractCategories()];
 
-    return Container(
-      padding: const EdgeInsets.all(16),
+    return Padding(
+      padding: EdgeInsets.all(padding),
       child: Row(
         children: [
           Expanded(
@@ -103,14 +105,16 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 );
               }).toList(),
               onChanged: (value) {
-                setState(() {
-                  _selectedCategory = value!;
-                  _filterProducts();
-                });
+                if (value != null) {
+                  setState(() {
+                    _selectedCategory = value;
+                    _filterProducts();
+                  });
+                }
               },
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: padding),
           _buildSortButton(),
         ],
       ),
@@ -135,25 +139,32 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  Widget _buildGridView() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.5,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: _filteredProducts.length,
-      itemBuilder: (context, index) {
-        final product = _filteredProducts[index];
-        return ProductCard(
-          product: product,
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              '/product-detail',
-              arguments: {'productId': product.id},
+  Widget _buildGridView(double padding) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        int crossAxisCount = (constraints.maxWidth ~/ 200).clamp(2, 4);
+        double childAspectRatio = (constraints.maxWidth / crossAxisCount) / (constraints.maxHeight * 0.6);
+
+        return GridView.builder(
+          padding: EdgeInsets.all(padding),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: childAspectRatio,
+            crossAxisSpacing: padding,
+            mainAxisSpacing: padding,
+          ),
+          itemCount: _filteredProducts.length,
+          itemBuilder: (context, index) {
+            final product = _filteredProducts[index];
+            return ProductCard(
+              product: product,
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  '/product-detail',
+                  arguments: {'productId': product.id},
+                );
+              },
             );
           },
         );
@@ -161,14 +172,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  Widget _buildListView() {
+  Widget _buildListView(double padding) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(padding),
       itemCount: _filteredProducts.length,
       itemBuilder: (context, index) {
         final product = _filteredProducts[index];
         return Card(
-          margin: const EdgeInsets.only(bottom: 16),
+          margin: EdgeInsets.only(bottom: padding),
           child: ListTile(
             leading: Container(
               width: 60,
@@ -208,10 +219,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ),
             trailing: Text(
               '\$${product.price.toStringAsFixed(0)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
+                color: Theme.of(context).primaryColor,
               ),
             ),
             onTap: () {
@@ -235,7 +246,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   void _filterProducts() {
     if (_selectedCategory == 'All') {
-      _filteredProducts = _products;
+      _filteredProducts = List<Product>.from(_products);
     } else {
       _filteredProducts =
           _products.where((product) => product.category == _selectedCategory).toList();
@@ -258,5 +269,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
         _filteredProducts.sort((a, b) => b.rating.compareTo(a.rating));
         break;
     }
+    setState(() {});
   }
 }
