@@ -396,7 +396,7 @@ Widget _buildImageCarousel() {
           ),
           const SizedBox(height: 16),
           Text(
-            '\$${_product!.price.toStringAsFixed(0)}',
+            'Rp${_product!.price.toStringAsFixed(0)}',
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -772,7 +772,7 @@ Widget _buildImageCarousel() {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '\$${product.price.toStringAsFixed(0)}',
+                                'Rp${product.price.toStringAsFixed(0)}',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -824,7 +824,7 @@ Widget _buildImageCarousel() {
                   ),
                 ),
                 Text(
-                  '\$${(_product!.price * _quantity).toStringAsFixed(0)}',
+                  'Rp${(_product!.price * _quantity).toStringAsFixed(0)}',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
