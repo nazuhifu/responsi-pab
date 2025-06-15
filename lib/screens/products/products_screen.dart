@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/utils/formatter.dart';
 import '../../models/product.dart';
 import '../../widgets/product_card.dart';
 import '../../utils/app_theme.dart';
@@ -217,7 +218,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
               ],
             ),
             trailing: Text(
-              'Rp${product.price.toStringAsFixed(0)}',
+              formatRupiah(product.price),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
