@@ -280,7 +280,7 @@ Widget _buildCategoriesSection() {
           ),
         ),
         SizedBox(
-          height: 280,
+          height: 320,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -28,7 +28,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   Future<void> _fetchProducts() async {
     try {
-      final snapshot = await FirebaseFirestore.instance.collection('products').get();
+      final snapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .get();
       final products = snapshot.docs.map((doc) {
         return Product.fromJson(doc.data());
       }).toList();
@@ -55,7 +57,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
               children: [
                 _buildFilters(padding),
                 Expanded(
-                  child: _isGridView ? _buildGridView(padding) : _buildListView(padding),
+                  child: _isGridView
+                      ? _buildGridView(padding)
+                      : _buildListView(padding),
                 ),
               ],
             ),
@@ -97,13 +101,13 @@ class _ProductsScreenState extends State<ProductsScreen> {
               decoration: const InputDecoration(
                 labelText: 'Category',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               items: categories.map((category) {
-                return DropdownMenuItem(
-                  value: category,
-                  child: Text(category),
-                );
+                return DropdownMenuItem(value: category, child: Text(category));
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -131,8 +135,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
       },
       itemBuilder: (context) => [
         const PopupMenuItem(value: 'name', child: Text('Name')),
-        const PopupMenuItem(value: 'price_low', child: Text('Price: Low to High')),
-        const PopupMenuItem(value: 'price_high', child: Text('Price: High to Low')),
+        const PopupMenuItem(
+          value: 'price_low',
+          child: Text('Price: Low to High'),
+        ),
+        const PopupMenuItem(
+          value: 'price_high',
+          child: Text('Price: High to Low'),
+        ),
         const PopupMenuItem(value: 'rating', child: Text('Rating')),
       ],
     );
@@ -143,7 +153,13 @@ class _ProductsScreenState extends State<ProductsScreen> {
       builder: (context, constraints) {
         int crossAxisCount = (constraints.maxWidth ~/ 200).clamp(2, 4);
         double childAspectRatio =
-            (constraints.maxWidth / crossAxisCount) / (constraints.maxHeight * 0.6);
+            (constraints.maxWidth / crossAxisCount) /
+            (constraints.maxHeight * 0.6);
+
+        double itemWidth = constraints.maxWidth / crossAxisCount;
+        double itemHeight = itemWidth * 1.7;
+
+        childAspectRatio = itemWidth / itemHeight;
 
         return GridView.builder(
           padding: EdgeInsets.all(padding),
@@ -248,8 +264,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
     if (_selectedCategory == 'All') {
       _filteredProducts = List<Product>.from(_products);
     } else {
-      _filteredProducts =
-          _products.where((product) => product.category == _selectedCategory).toList();
+      _filteredProducts = _products
+          .where((product) => product.category == _selectedCategory)
+          .toList();
     }
     _sortProducts();
   }
