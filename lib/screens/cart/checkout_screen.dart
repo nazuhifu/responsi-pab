@@ -442,7 +442,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Expanded(
                     child: Text('${item.product.name} x${item.quantity}'),
                   ),
-                  Text('\$${item.totalPrice.toStringAsFixed(2)}'),
+                  Text('Rp${item.totalPrice.toStringAsFixed(2)}'),
                 ],
               ),
             )),
@@ -450,14 +450,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Row(
               children: [
                 const Expanded(child: Text('Subtotal:')),
-                Text('\$${cart.totalAmount.toStringAsFixed(2)}'),
+                Text('Rp${cart.totalAmount.toStringAsFixed(2)}'),
               ],
             ),
             const SizedBox(height: 4),
             Row(
               children: [
                 const Expanded(child: Text('Shipping:')),
-                Text(shipping == 0 ? 'Free' : '\$${shipping.toStringAsFixed(2)}'),
+                Text(shipping == 0 ? 'Free' : 'Rp${shipping.toStringAsFixed(2)}'),
               ],
             ),
             const SizedBox(height: 8),
@@ -470,7 +470,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ),
                 Text(
-                  '\$${total.toStringAsFixed(2)}',
+                  'Rp${total.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primaryColor,

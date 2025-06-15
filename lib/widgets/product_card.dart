@@ -199,7 +199,7 @@ class ProductCard extends StatelessWidget {
 
   Widget _buildPrice() {
     return Text(
-      '\$${product.price.toStringAsFixed(0)}',
+      'Rp${product.price.toStringAsFixed(0)}',
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
