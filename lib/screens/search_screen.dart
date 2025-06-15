@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/sample_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/product.dart';
 import '../widgets/product_card.dart';
 
@@ -12,8 +12,35 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+  List<Product> _allProducts = [];
   List<Product> _searchResults = [];
   bool _isSearching = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('products').get();
+      final products = snapshot.docs.map((doc) {
+        return Product.fromFirestore(doc.data());
+      }).toList();
+
+      setState(() {
+        _allProducts = products;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading products for search: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -48,7 +75,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
         ],
       ),
-      body: _buildBody(),
+      body: _isLoading ? const Center(child: CircularProgressIndicator()) : _buildBody(),
     );
   }
 
@@ -181,12 +208,12 @@ class _SearchScreenState extends State<SearchScreen> {
       _isSearching = true;
     });
 
-    // Simulate search delay
-    Future.delayed(const Duration(milliseconds: 500), () {
-      final results = SampleData.allProducts.where((product) {
-        return product.name.toLowerCase().contains(query.toLowerCase()) ||
-            product.category.toLowerCase().contains(query.toLowerCase()) ||
-            product.description.toLowerCase().contains(query.toLowerCase());
+    Future.delayed(const Duration(milliseconds: 300), () {
+      final results = _allProducts.where((product) {
+        final q = query.toLowerCase();
+        return product.name.toLowerCase().contains(q) ||
+            product.category.toLowerCase().contains(q) ||
+            product.description.toLowerCase().contains(q);
       }).toList();
 
       setState(() {

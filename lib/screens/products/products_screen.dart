@@ -1,7 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/product_card.dart';
-import '../../data/sample_data.dart';
 import '../../models/product.dart';
+import '../../widgets/product_card.dart';
 import '../../utils/app_theme.dart';
 
 class ProductsScreen extends StatefulWidget {
@@ -17,26 +17,45 @@ class _ProductsScreenState extends State<ProductsScreen> {
   String _selectedCategory = 'All';
   String _sortBy = 'name';
   bool _isGridView = true;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _products = SampleData.allProducts;
-    _filteredProducts = _products;
+    _fetchProducts();
+  }
+
+  Future<void> _fetchProducts() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('products').get();
+      final products = snapshot.docs.map((doc) {
+        return Product.fromFirestore(doc.data());
+      }).toList();
+
+      setState(() {
+        _products = products;
+        _filteredProducts = products;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Gagal ambil produk dari Firebase: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          _buildFilters(),
-          Expanded(
-            child: _isGridView ? _buildGridView() : _buildListView(),
-          ),
-        ],
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                _buildFilters(),
+                Expanded(
+                  child: _isGridView ? _buildGridView() : _buildListView(),
+                ),
+              ],
+            ),
     );
   }
 
@@ -63,46 +82,38 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Widget _buildFilters() {
+    final categories = ['All', ..._extractCategories()];
+
     return Container(
       padding: const EdgeInsets.all(16),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: _buildCategoryFilter(),
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              value: _selectedCategory,
+              decoration: const InputDecoration(
+                labelText: 'Category',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
-              const SizedBox(width: 16),
-              _buildSortButton(),
-            ],
+              items: categories.map((category) {
+                return DropdownMenuItem(
+                  value: category,
+                  child: Text(category),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedCategory = value!;
+                  _filterProducts();
+                });
+              },
+            ),
           ),
+          const SizedBox(width: 16),
+          _buildSortButton(),
         ],
       ),
-    );
-  }
-
-  Widget _buildCategoryFilter() {
-    final categories = ['All', ...SampleData.categories.map((c) => c.name)];
-    
-    return DropdownButtonFormField<String>(
-      value: _selectedCategory,
-      decoration: const InputDecoration(
-        labelText: 'Category',
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      items: categories.map((category) {
-        return DropdownMenuItem(
-          value: category,
-          child: Text(category),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _selectedCategory = value!;
-          _filterProducts();
-        });
-      },
     );
   }
 
@@ -116,22 +127,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
         });
       },
       itemBuilder: (context) => [
-        const PopupMenuItem(
-          value: 'name',
-          child: Text('Name'),
-        ),
-        const PopupMenuItem(
-          value: 'price_low',
-          child: Text('Price: Low to High'),
-        ),
-        const PopupMenuItem(
-          value: 'price_high',
-          child: Text('Price: High to Low'),
-        ),
-        const PopupMenuItem(
-          value: 'rating',
-          child: Text('Rating'),
-        ),
+        const PopupMenuItem(value: 'name', child: Text('Name')),
+        const PopupMenuItem(value: 'price_low', child: Text('Price: Low to High')),
+        const PopupMenuItem(value: 'price_high', child: Text('Price: High to Low')),
+        const PopupMenuItem(value: 'rating', child: Text('Rating')),
       ],
     );
   }
@@ -184,9 +183,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       child: Image.network(
                         product.images.first,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.chair, color: Colors.grey);
-                        },
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.chair, color: Colors.grey),
                       ),
                     )
                   : const Icon(Icons.chair, color: Colors.grey),
@@ -229,35 +227,36 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
+  List<String> _extractCategories() {
+    final categories = _products.map((p) => p.category).toSet().toList();
+    categories.sort();
+    return categories;
+  }
+
   void _filterProducts() {
-    setState(() {
-      if (_selectedCategory == 'All') {
-        _filteredProducts = _products;
-      } else {
-        _filteredProducts = _products
-            .where((product) => product.category == _selectedCategory)
-            .toList();
-      }
-      _sortProducts();
-    });
+    if (_selectedCategory == 'All') {
+      _filteredProducts = _products;
+    } else {
+      _filteredProducts =
+          _products.where((product) => product.category == _selectedCategory).toList();
+    }
+    _sortProducts();
   }
 
   void _sortProducts() {
-    setState(() {
-      switch (_sortBy) {
-        case 'name':
-          _filteredProducts.sort((a, b) => a.name.compareTo(b.name));
-          break;
-        case 'price_low':
-          _filteredProducts.sort((a, b) => a.price.compareTo(b.price));
-          break;
-        case 'price_high':
-          _filteredProducts.sort((a, b) => b.price.compareTo(a.price));
-          break;
-        case 'rating':
-          _filteredProducts.sort((a, b) => b.rating.compareTo(a.rating));
-          break;
-      }
-    });
+    switch (_sortBy) {
+      case 'name':
+        _filteredProducts.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case 'price_low':
+        _filteredProducts.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case 'price_high':
+        _filteredProducts.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case 'rating':
+        _filteredProducts.sort((a, b) => b.rating.compareTo(a.rating));
+        break;
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'product.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CartItem {
   final String id;
@@ -39,11 +40,34 @@ class CartItem {
   }
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
+    final addedAtRaw = json['addedAt'];
     return CartItem(
       id: json['id'],
       product: Product.fromJson(json['product']),
       quantity: json['quantity'],
-      addedAt: DateTime.parse(json['addedAt']),
+      addedAt: addedAtRaw is Timestamp
+          ? addedAtRaw.toDate()
+          : DateTime.parse(addedAtRaw),
+    );
+  }
+
+  /// Untuk disimpan ke Firestore (tidak menyimpan full produk)
+  Map<String, dynamic> toFirestore() {
+    return {
+      'productId': product.id,
+      'quantity': quantity,
+      'addedAt': Timestamp.fromDate(addedAt),
+    };
+  }
+
+  /// Untuk mengambil dari Firestore + ambil `Product` secara terpisah
+  factory CartItem.fromFirestore(
+      Map<String, dynamic> json, Product fullProduct) {
+    return CartItem(
+      id: json['id'],
+      product: fullProduct,
+      quantity: json['quantity'],
+      addedAt: (json['addedAt'] as Timestamp).toDate(),
     );
   }
 }

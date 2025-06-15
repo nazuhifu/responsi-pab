@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../providers/wishlist_provider.dart';
@@ -51,6 +54,38 @@ class ProductCard extends StatelessWidget {
   }
 
   Widget _buildImage() {
+    Widget imageWidget;
+
+    if (product.images.isNotEmpty) {
+      final image = product.images.first;
+
+      if (image.startsWith('data:image')) {
+        try {
+          final base64Str = image.split(',').last;
+          final bytes = base64Decode(base64Str);
+          imageWidget = Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.chair, size: 40, color: Colors.grey);
+            },
+          );
+        } catch (_) {
+          imageWidget = const Icon(Icons.chair, size: 40, color: Colors.grey);
+        }
+      } else {
+        imageWidget = Image.network(
+          image,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.chair, size: 40, color: Colors.grey);
+          },
+        );
+      }
+    } else {
+      imageWidget = const Icon(Icons.chair, size: 40, color: Colors.grey);
+    }
+
     return Stack(
       children: [
         Container(
@@ -60,26 +95,10 @@ class ProductCard extends StatelessWidget {
             color: Colors.grey.shade200,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           ),
-          child: product.images.isNotEmpty
-              ? ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.network(
-                    product.images.first,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
-                        Icons.chair,
-                        size: 40,
-                        color: Colors.grey,
-                      );
-                    },
-                  ),
-                )
-              : const Icon(
-                  Icons.chair,
-                  size: 40,
-                  color: Colors.grey,
-                ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: imageWidget,
+          ),
         ),
         Positioned(
           top: 8,
@@ -151,7 +170,7 @@ class ProductCard extends StatelessWidget {
 
   Widget _buildRating() {
     if (product.rating == 0) return const SizedBox.shrink();
-    
+
     return Row(
       children: [
         const Icon(
