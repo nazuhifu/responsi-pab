@@ -8,6 +8,9 @@ import '../../providers/cart_provider.dart';
 import '../../providers/wishlist_provider.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/review_card.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -54,7 +57,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         _error = null;
       });
 
-      // Fetch product details
       final productDoc = await _firestore
           .collection('products')
           .doc(widget.productId)
@@ -68,22 +70,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         return;
       }
 
-      final productData = productDoc.data()!;
-      _product = Product(
-        id: productDoc.id,
-        name: productData['name'] ?? '',
-        description: productData['description'] ?? '',
-        price: (productData['price'] ?? 0).toDouble(),
-        category: productData['category'] ?? '',
-        images: List<String>.from(productData['images'] ?? []),
-        rating: (productData['rating'] ?? 0).toDouble(),
-        reviewCount: productData['reviewCount'] ?? 0,
-        stock: productData['stock'] ?? 0,
-        features: List<String>.from(productData['features'] ?? []),
-        specifications: Map<String, String>.from(productData['specifications'] ?? {}),
-      );
+      _product = Product.fromFirestore(productDoc.data()!);
 
-      // Load reviews and related products in parallel
       await Future.wait([
         _loadReviews(),
         _loadRelatedProducts(),
@@ -112,12 +100,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
       _reviews = reviewsSnapshot.docs.map((doc) {
         final data = doc.data();
+
+        // Tangani kemungkinan null pada createdAt
+        final Timestamp? createdAt = data['createdAt'] is Timestamp
+            ? data['createdAt']
+            : null;
+
         return {
           'id': doc.id,
           'name': data['userName'] ?? 'Anonymous',
           'rating': (data['rating'] ?? 0).toDouble(),
           'comment': data['comment'] ?? '',
-          'date': _formatDate(data['createdAt'] as Timestamp?),
+          'date': _formatDate(createdAt),
         };
       }).toList();
     } catch (e) {
@@ -125,6 +119,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       _reviews = [];
     }
   }
+
+  String _formatDate(Timestamp? timestamp) {
+  if (timestamp == null) return 'Unknown date';
+  final date = timestamp.toDate();
+  return '${_getMonthName(date.month)} ${date.day}, ${date.year}';
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      '', 'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month];
+  }
+
 
   Future<void> _loadRelatedProducts() async {
     if (_product == null) return;
@@ -137,40 +146,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           .limit(6)
           .get();
 
-      _relatedProducts = relatedSnapshot.docs.map((doc) {
-        final data = doc.data();
-        return Product(
-          id: doc.id,
-          name: data['name'] ?? '',
-          description: data['description'] ?? '',
-          price: (data['price'] ?? 0).toDouble(),
-          category: data['category'] ?? '',
-          images: List<String>.from(data['images'] ?? []),
-          rating: (data['rating'] ?? 0).toDouble(),
-          reviewCount: data['reviewCount'] ?? 0,
-          stock: data['stock'] ?? 0,
-          features: List<String>.from(data['features'] ?? []),
-          specifications: Map<String, String>.from(data['specifications'] ?? {}),
-        );
-      }).toList();
+      _relatedProducts = relatedSnapshot.docs
+          .map((doc) => Product.fromFirestore(doc.data()))
+          .toList();
     } catch (e) {
       print('Error loading related products: $e');
       _relatedProducts = [];
     }
-  }
-
-  String _formatDate(Timestamp? timestamp) {
-    if (timestamp == null) return 'Unknown date';
-    final date = timestamp.toDate();
-    return '${_getMonthName(date.month)} ${date.day}, ${date.year}';
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      '', 'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[month];
   }
 
   Future<void> _refreshProduct() async {
@@ -302,90 +284,72 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     );
   }
 
-  Widget _buildImageCarousel() {
-    if (_product!.images.isEmpty) {
-      return Container(
-        color: Colors.grey.shade200,
-        child: const Center(
-          child: Icon(
-            Icons.chair,
-            size: 80,
-            color: Colors.grey,
-          ),
+Widget _buildImageCarousel() {
+  if (_product!.images.isEmpty) {
+    return Container(
+      color: Colors.grey.shade200,
+      child: const Center(
+        child: Icon(
+          Icons.chair,
+          size: 80,
+          color: Colors.grey,
         ),
-      );
-    }
-
-    return Stack(
-      children: [
-        CarouselSlider(
-          options: CarouselOptions(
-            height: 300,
-            viewportFraction: 1.0,
-            onPageChanged: (index, reason) {
-              setState(() {
-                _currentImageIndex = index;
-              });
-            },
-          ),
-          items: _product!.images.map((image) {
-            return Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-              ),
-              child: Image.network(
-                image,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return const Center(
-                    child: Icon(
-                      Icons.chair,
-                      size: 80,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
-              ),
-            );
-          }).toList(),
-        ),
-        if (_product!.images.length > 1)
-          Positioned(
-            bottom: 16,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: _product!.images.asMap().entries.map((entry) {
-                return Container(
-                  width: 8,
-                  height: 8,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentImageIndex == entry.key
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.4),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-      ],
+      ),
     );
   }
+
+  return Stack(
+    children: [
+      CarouselSlider(
+        options: CarouselOptions(
+          height: 300,
+          viewportFraction: 1.0,
+          onPageChanged: (index, reason) {
+            setState(() {
+              _currentImageIndex = index;
+            });
+          },
+        ),
+        items: _product!.images.map((imageBase64) {
+          Uint8List imageBytes = base64Decode(imageBase64.split(',').last);
+          return Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+            ),
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.cover,
+            ),
+          );
+        }).toList(),
+      ),
+      if (_product!.images.length > 1)
+        Positioned(
+          bottom: 16,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: _product!.images.asMap().entries.map((entry) {
+              return Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentImageIndex == entry.key
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.4),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+    ],
+  );
+}
+
 
   Widget _buildProductInfo() {
     return Padding(
@@ -670,27 +634,40 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     );
   }
 
-  Widget _buildReviewsTab() {
-    if (_reviews.isEmpty) {
-      return const Center(
-        child: Text(
-          'No reviews yet',
-          style: TextStyle(color: Colors.grey),
-        ),
-      );
+
+    Widget _buildReviewsTab() {
+    // Sample reviews data
+    final reviews = [
+      {
+        'name': 'Sarah Johnson',
+        'rating': 5.0,
+        'date': 'January 15, 2024',
+        'comment': 'Absolutely stunning piece! The craftsmanship is exceptional.',
+      },
+      {
+        'name': 'Michael Chen',
+        'rating': 4.0,
+        'date': 'December 3, 2023',
+        'comment': 'Beautiful furniture, minor assembly issues but overall great quality.',
+      },
+    ];
+
+    if (reviews.isEmpty) {
+      return const Center(child: Text('No reviews yet.'));
     }
 
-    return ListView.builder(
+    return ListView.separated(
+      itemCount: reviews.length,
       padding: const EdgeInsets.all(16),
-      itemCount: _reviews.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final review = _reviews[index];
+        final review = reviews[index];
         return ReviewCard(
-          name: review['name'] as String,
-          rating: review['rating'] as double,
-          date: review['date'] as String,
-          comment: review['comment'] as String,
-        );
+        name: review['name'] as String,
+        rating: review['rating'] as double,
+        date: review['date'] as String,
+        comment: review['comment'] as String,
+      );
       },
     );
   }
