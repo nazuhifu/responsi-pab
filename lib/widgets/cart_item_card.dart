@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/cart_item.dart';
 import '../utils/app_theme.dart';
 import '../utils/formatter.dart';
+import 'dart:convert';
 
 class CartItemCard extends StatelessWidget {
   final CartItem cartItem;
@@ -46,14 +47,22 @@ class CartItemCard extends StatelessWidget {
       child: cartItem.product.images.isNotEmpty
           ? ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                cartItem.product.images.first,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    Icons.chair,
-                    color: Colors.grey,
-                  );
+              child: Builder(
+                builder: (context) {
+                  try {
+                    final imageBase64 = cartItem.product.images.first;
+                    final base64Str = imageBase64.split(',').last;
+                    final bytes = base64Decode(base64Str);
+                    return Image.memory(
+                      bytes,
+                      fit: BoxFit.cover,
+                    );
+                  } catch (e) {
+                    return const Icon(
+                      Icons.chair,
+                      color: Colors.grey,
+                    );
+                  }
                 },
               ),
             )
@@ -63,6 +72,7 @@ class CartItemCard extends StatelessWidget {
             ),
     );
   }
+
 
   Widget _buildProductInfo() {
     return Column(
