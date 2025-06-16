@@ -351,8 +351,33 @@ Widget _buildImageCarousel() {
   );
 }
 
+List<Map<String, dynamic>> get _sampleReviews => [
+  {
+    'name': 'Sarah Johnson',
+    'rating': 5.0,
+    'date': 'January 15, 2024',
+    'comment': 'Absolutely stunning piece! The craftsmanship is exceptional.',
+  },
+  {
+    'name': 'Michael Chen',
+    'rating': 4.0,
+    'date': 'December 3, 2023',
+    'comment': 'Beautiful furniture, minor assembly issues but overall great quality.',
+  },
+];
 
-  Widget _buildProductInfo() {
+    Widget _buildProductInfo() {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+
+    // Hitung rata-rata rating dari sample data
+    final averageRating = _sampleReviews.isNotEmpty
+        ? _sampleReviews.map((r) => r['rating'] as double).reduce((a, b) => a + b) / _sampleReviews.length
+        : 0.0;
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -360,44 +385,32 @@ Widget _buildImageCarousel() {
         children: [
           Text(
             _product!.category,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Colors.grey, fontSize: 14),
           ),
           const SizedBox(height: 4),
           Text(
             _product!.name,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
               RatingBarIndicator(
-                rating: _product!.rating,
-                itemBuilder: (context, index) => const Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                ),
+                rating: averageRating,
+                itemBuilder: (context, index) => const Icon(Icons.star, color: Colors.amber),
                 itemCount: 5,
                 itemSize: 20.0,
               ),
               const SizedBox(width: 8),
               Text(
-                '${_product!.rating.toStringAsFixed(1)} (${_product!.reviewCount} reviews)',
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
+                '${averageRating.toStringAsFixed(1)} (${_sampleReviews.length} reviews)',
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Text(
-            '\$${_product!.price.toStringAsFixed(0)}',
+            formatter.format(_product!.price),
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -407,11 +420,7 @@ Widget _buildImageCarousel() {
           const SizedBox(height: 16),
           Text(
             _product!.description,
-            style: const TextStyle(
-              fontSize: 16,
-              height: 1.5,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.grey),
           ),
         ],
       ),
@@ -635,40 +644,23 @@ Widget _buildImageCarousel() {
     );
   }
 
-
-    Widget _buildReviewsTab() {
-    // Sample reviews data
-    final reviews = [
-      {
-        'name': 'Sarah Johnson',
-        'rating': 5.0,
-        'date': 'January 15, 2024',
-        'comment': 'Absolutely stunning piece! The craftsmanship is exceptional.',
-      },
-      {
-        'name': 'Michael Chen',
-        'rating': 4.0,
-        'date': 'December 3, 2023',
-        'comment': 'Beautiful furniture, minor assembly issues but overall great quality.',
-      },
-    ];
-
-    if (reviews.isEmpty) {
+  Widget _buildReviewsTab() {
+    if (_sampleReviews.isEmpty) {
       return const Center(child: Text('No reviews yet.'));
     }
 
     return ListView.separated(
-      itemCount: reviews.length,
+      itemCount: _sampleReviews.length,
       padding: const EdgeInsets.all(16),
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final review = reviews[index];
+        final review = _sampleReviews[index];
         return ReviewCard(
-        name: review['name'] as String,
-        rating: review['rating'] as double,
-        date: review['date'] as String,
-        comment: review['comment'] as String,
-      );
+          name: review['name'] as String,
+          rating: review['rating'] as double,
+          date: review['date'] as String,
+          comment: review['comment'] as String,
+        );
       },
     );
   }
@@ -801,6 +793,13 @@ Widget _buildImageCarousel() {
   Widget _buildBottomBar() {
     final isOutOfStock = _product!.stock == 0;
     
+    // Format untuk rupiah dengan titik sebagai pemisah ribuan
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -828,7 +827,7 @@ Widget _buildImageCarousel() {
                   ),
                 ),
                 Text(
-                  '\$${(_product!.price * _quantity).toStringAsFixed(0)}',
+                  currencyFormatter.format(_product!.price),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

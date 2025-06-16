@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/cart_item.dart';
 import '../models/product.dart';
 
@@ -10,6 +11,22 @@ class CartProvider with ChangeNotifier {
   
   double get totalAmount {
     return _items.fold(0.0, (sum, item) => sum + item.totalPrice);
+  }
+
+  // Getter untuk format total amount dalam rupiah
+  String get formattedTotalAmount {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+    return formatter.format(totalAmount);
+  }
+
+  // Getter untuk format total amount dengan titik (tanpa simbol Rp)
+  String get formattedTotalAmountWithDots {
+    final formatter = NumberFormat('#,###', 'id_ID');
+    return formatter.format(totalAmount);
   }
 
   int get totalItems {
@@ -71,5 +88,21 @@ class CartProvider with ChangeNotifier {
       ),
     );
     return item.quantity;
+  }
+
+  // Method helper untuk format harga individual item
+  String formatPrice(double price) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+    return formatter.format(price);
+  }
+
+  // Method helper untuk format harga dengan titik saja
+  String formatPriceWithDots(double price) {
+    final formatter = NumberFormat('#,###', 'id_ID');
+    return formatter.format(price);
   }
 }

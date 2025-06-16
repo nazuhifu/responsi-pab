@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../providers/cart_provider.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/cart_item_card.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
+
+  // Helper method untuk format rupiah
+  String _formatRupiah(double amount) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+    return formatter.format(amount);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +116,9 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget _buildCartSummary(BuildContext context, CartProvider cart) {
+    final shippingCost = cart.totalAmount > 500000 ? 0.0 : 25000.0; // Free shipping di atas 500rb
+    final totalAmount = cart.totalAmount + shippingCost;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -131,7 +145,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Rp${cart.totalAmount.toStringAsFixed(2)}',
+                  _formatRupiah(cart.totalAmount),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -150,7 +164,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  cart.totalAmount > 100 ? 'Free' : 'Rp999.000',
+                  shippingCost == 0 ? 'Free' : _formatRupiah(shippingCost),
                   style: const TextStyle(
                     color: Colors.grey,
                   ),
@@ -169,7 +183,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Rp${_calculateTotal(cart).toStringAsFixed(2)}',
+                  _formatRupiah(totalAmount),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -192,11 +206,6 @@ class CartScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  double _calculateTotal(CartProvider cart) {
-    final shipping = cart.totalAmount > 100 ? 0 : 9.99;
-    return cart.totalAmount + shipping;
   }
 
   void _showClearCartDialog(BuildContext context, CartProvider cart) {
