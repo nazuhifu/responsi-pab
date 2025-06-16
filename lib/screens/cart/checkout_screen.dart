@@ -318,48 +318,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _expiryController,
-                    decoration: const InputDecoration(
-                      labelText: 'MM/YY',
-                      hintText: '12/25',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter expiry date';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _cvvController,
-                    decoration: const InputDecoration(
-                      labelText: 'CVV',
-                      hintText: '123',
-                    ),
-                    keyboardType: TextInputType.number,
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter CVV';
-                      }
-                      if (value.length < 3) {
-                        return 'Please enter valid CVV';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.all(16),
