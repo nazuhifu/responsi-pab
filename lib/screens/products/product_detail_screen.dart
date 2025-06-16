@@ -38,6 +38,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // Sample reviews data - defined once at class level
+  final List<Map<String, dynamic>> _sampleReviews = [
+    {
+      'name': 'Sarah Johnson',
+      'rating': 5.0,
+      'date': 'January 15, 2024',
+      'comment': 'Absolutely stunning piece! The craftsmanship is exceptional.',
+    },
+    {
+      'name': 'Michael Chen',
+      'rating': 4.0,
+      'date': 'December 3, 2023',
+      'comment': 'Beautiful furniture, minor assembly issues but overall great quality.',
+    },
+  ];
+
+  // Calculate average rating from sample data
+  double get _averageRating {
+    if (_sampleReviews.isEmpty) return 0.0;
+    return _sampleReviews.map((r) => r['rating'] as double).reduce((a, b) => a + b) / _sampleReviews.length;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -377,7 +399,7 @@ Widget _buildImageCarousel() {
           Row(
             children: [
               RatingBarIndicator(
-                rating: _product!.rating,
+                rating: _averageRating,
                 itemBuilder: (context, index) => const Icon(
                   Icons.star,
                   color: Colors.amber,
@@ -387,7 +409,7 @@ Widget _buildImageCarousel() {
               ),
               const SizedBox(width: 8),
               Text(
-                '${_product!.rating.toStringAsFixed(1)} (${_product!.reviewCount} reviews)',
+                '${_averageRating.toStringAsFixed(1)} (${_sampleReviews.length} reviews)',
                 style: const TextStyle(
                   color: Colors.grey,
                   fontSize: 14,
@@ -635,34 +657,17 @@ Widget _buildImageCarousel() {
     );
   }
 
-
-    Widget _buildReviewsTab() {
-    // Sample reviews data
-    final reviews = [
-      {
-        'name': 'Sarah Johnson',
-        'rating': 5.0,
-        'date': 'January 15, 2024',
-        'comment': 'Absolutely stunning piece! The craftsmanship is exceptional.',
-      },
-      {
-        'name': 'Michael Chen',
-        'rating': 4.0,
-        'date': 'December 3, 2023',
-        'comment': 'Beautiful furniture, minor assembly issues but overall great quality.',
-      },
-    ];
-
-    if (reviews.isEmpty) {
+  Widget _buildReviewsTab() {
+    if (_sampleReviews.isEmpty) {
       return const Center(child: Text('No reviews yet.'));
     }
 
     return ListView.separated(
-      itemCount: reviews.length,
+      itemCount: _sampleReviews.length,
       padding: const EdgeInsets.all(16),
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final review = reviews[index];
+        final review = _sampleReviews[index];
         return ReviewCard(
         name: review['name'] as String,
         rating: review['rating'] as double,
