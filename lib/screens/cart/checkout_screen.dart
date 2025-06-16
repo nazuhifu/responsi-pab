@@ -5,7 +5,6 @@ import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/checkout_step.dart';
-import '../../utils/formatter.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
