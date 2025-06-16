@@ -15,7 +15,16 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap ?? () {
+        Navigator.pushNamed(
+          context,
+          '/products',
+          arguments: {
+            'category': category.name,
+            'title': category.name,
+          },
+        );
+      },
       child: Container(
         width: 100,
         margin: const EdgeInsets.only(right: 12),
@@ -50,4 +59,6 @@ class CategoryCard extends StatelessWidget {
       ),
     );
   }
+
+
 }

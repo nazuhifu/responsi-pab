@@ -19,11 +19,30 @@ class _ProductsScreenState extends State<ProductsScreen> {
   String _sortBy = 'name';
   bool _isGridView = true;
   bool _isLoading = true;
+  String _appBarTitle = 'Products';
 
   @override
   void initState() {
     super.initState();
     _fetchProducts();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Ambil arguments dari navigasi
+    final arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    
+    if (arguments != null) {
+      final categoryFromNav = arguments['category'] as String?;
+      final titleFromNav = arguments['title'] as String?;
+      
+      if (categoryFromNav != null && categoryFromNav.isNotEmpty) {
+        _selectedCategory = categoryFromNav;
+        _appBarTitle = titleFromNav ?? categoryFromNav;
+      }
+    }
   }
 
   Future<void> _fetchProducts() async {
@@ -37,11 +56,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
       setState(() {
         _products = products;
-        _filteredProducts = List<Product>.from(products);
+        _filterProducts(); // Filter setelah data dimuat
         _isLoading = false;
       });
     } catch (e) {
       debugPrint('Gagal ambil produk dari Firebase: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -57,9 +79,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
               children: [
                 _buildFilters(padding),
                 Expanded(
-                  child: _isGridView
-                      ? _buildGridView(padding)
-                      : _buildListView(padding),
+                  child: _filteredProducts.isEmpty
+                      ? _buildEmptyState()
+                      : _isGridView
+                          ? _buildGridView(padding)
+                          : _buildListView(padding),
                 ),
               ],
             ),
@@ -88,6 +112,42 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.inbox_outlined,
+            size: 80,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _selectedCategory == 'All' 
+                ? 'No products found'
+                : 'No products found in $_selectedCategory',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _selectedCategory = 'All';
+                _appBarTitle = 'All Products';
+                _filterProducts();
+              });
+            },
+            child: const Text('Show All Products'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFilters(double padding) {
     final categories = ['All', ..._extractCategories()];
 
@@ -113,6 +173,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 if (value != null) {
                   setState(() {
                     _selectedCategory = value;
+                    _appBarTitle = value == 'All' ? 'All Products' : value;
                     _filterProducts();
                   });
                 }
