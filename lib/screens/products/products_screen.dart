@@ -4,6 +4,7 @@ import 'package:flutter_application_1/utils/formatter.dart';
 import '../../models/product.dart';
 import '../../widgets/product_card.dart';
 import '../../utils/app_theme.dart';
+import 'dart:convert';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -60,7 +61,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      debugPrint('Gagal ambil produk dari Firebase: $e');
+      debugPrint('Gagal ambil produk dari Database: $e');
       setState(() {
         _isLoading = false;
       });
@@ -255,6 +256,42 @@ class _ProductsScreenState extends State<ProductsScreen> {
       itemCount: _filteredProducts.length,
       itemBuilder: (context, index) {
         final product = _filteredProducts[index];
+        
+        // Siapkan widget gambar
+        Widget imageWidget;
+        if (product.images.isNotEmpty) {
+          final image = product.images.first;
+          
+          // Jika gambar berformat base64
+          if (image.startsWith('data:image')) {
+            try {
+              final base64Str = image.split(',').last;
+              final bytes = base64Decode(base64Str);
+              imageWidget = Image.memory(
+                bytes,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.chair, color: Colors.grey);
+                },
+              );
+            } catch (e) {
+              imageWidget = const Icon(Icons.chair, color: Colors.grey);
+            }
+          } 
+          // Jika gambar berformat URL network
+          else {
+            imageWidget = Image.network(
+              image,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.chair, color: Colors.grey);
+              },
+            );
+          }
+        } else {
+          imageWidget = const Icon(Icons.chair, color: Colors.grey);
+        }
+        
         return Card(
           margin: EdgeInsets.only(bottom: padding),
           child: ListTile(
@@ -265,17 +302,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: product.images.isNotEmpty
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        product.images.first,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.chair, color: Colors.grey),
-                      ),
-                    )
-                  : const Icon(Icons.chair, color: Colors.grey),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: imageWidget,
+              ),
             ),
             title: Text(
               product.name,
