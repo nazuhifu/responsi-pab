@@ -280,7 +280,7 @@ Widget _buildCategoriesSection() {
           ),
         ),
         SizedBox(
-          height: 280,
+          height: 320,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -331,7 +331,7 @@ Widget _buildCategoriesSection() {
                   ),
                 ),
                 const Text(
-                  'On orders over Rp 10.000.000',
+                  'On orders over Rp5.000.000',
                   style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 8),

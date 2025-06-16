@@ -4,19 +4,10 @@ import 'package:intl/intl.dart';
 import '../../providers/cart_provider.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/cart_item_card.dart';
+import '../../utils/formatter.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
-
-  // Helper method untuk format rupiah
-  String _formatRupiah(double amount) {
-    final formatter = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp',
-      decimalDigits: 0,
-    );
-    return formatter.format(amount);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +136,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _formatRupiah(cart.totalAmount),
+                  formatRupiah(cart.totalAmount),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -164,7 +155,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  shippingCost == 0 ? 'Free' : _formatRupiah(shippingCost),
+                  cart.totalAmount > 1 ? 'Free' : 'Rp99.000',
                   style: const TextStyle(
                     color: Colors.grey,
                   ),
@@ -183,7 +174,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _formatRupiah(totalAmount),
+                  formatRupiah(_calculateTotal(cart)),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

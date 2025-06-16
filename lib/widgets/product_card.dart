@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../utils/formatter.dart';
 import 'dart:convert';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
@@ -21,34 +22,71 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(right: 12, bottom: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildImage(),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildCategory(),
-                    _buildName(),
-                    _buildRating(),
-                    const Spacer(),
-                    _buildPrice(),
-                    if (showAddToCart) _buildActions(context),
-                  ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 180;
+        final titleFontSize = isWide ? 14.0 : 12.0;
+        final priceFontSize = isWide ? 16.0 : 14.0;
+
+        return Card(
+          margin: const EdgeInsets.only(right: 12, bottom: 8),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildImage(),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildCategory(),
+                              const SizedBox(height: 4),
+                              Text(
+                                product.name,
+                                style: TextStyle(
+                                  fontSize: titleFontSize,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              _buildRating(),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          formatRupiah(product.price),
+                          style: TextStyle(
+                            fontSize: priceFontSize,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (showAddToCart) ...[
+                          const SizedBox(height: 8),
+                          _buildActions(context),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -148,20 +186,14 @@ class ProductCard extends StatelessWidget {
   Widget _buildCategory() {
     return Text(
       product.category,
-      style: const TextStyle(
-        fontSize: 12,
-        color: Colors.grey,
-      ),
+      style: const TextStyle(fontSize: 12, color: Colors.grey),
     );
   }
 
   Widget _buildName() {
     return Text(
       product.name,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-      ),
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
@@ -172,35 +204,32 @@ class ProductCard extends StatelessWidget {
 
     return Row(
       children: [
-        const Icon(
-          Icons.star,
-          size: 14,
-          color: Colors.amber,
-        ),
+        const Icon(Icons.star, size: 14, color: Colors.amber),
         const SizedBox(width: 4),
         Text(
           product.rating.toStringAsFixed(1),
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
         Text(
           ' (${product.reviewCount})',
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
       ],
     );
   }
 
   Widget _buildPrice() {
+<<<<<<< HEAD
     final formatter = NumberFormat('#,###', 'id_ID');
 
     return Text(
       'Rp${formatter.format(product.price)}',
+=======
+    final formattedPrice = formatRupiah(product.price);
+
+    return Text(
+      formattedPrice,
+>>>>>>> 4b4643c79c9fb21632c1805183f166873a945885
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
