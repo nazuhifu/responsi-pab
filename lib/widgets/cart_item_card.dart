@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/cart_item.dart';
 import '../utils/app_theme.dart';
-<<<<<<< HEAD
-import 'package:intl/intl.dart';
-=======
 import '../utils/formatter.dart';
->>>>>>> 4b4643c79c9fb21632c1805183f166873a945885
 
 class CartItemCard extends StatelessWidget {
   final CartItem cartItem;
@@ -93,11 +89,7 @@ class CartItemCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-<<<<<<< HEAD
-          'Rp${formatter.format(cartItem.product.price)} each',
-=======
           formatRupiah(cartItem.product.price),
->>>>>>> 4b4643c79c9fb21632c1805183f166873a945885
           style: const TextStyle(
             color: Colors.grey,
             fontSize: 14,
@@ -105,11 +97,7 @@ class CartItemCard extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-<<<<<<< HEAD
-          'Rp${formatter.format(cartItem.totalPrice)}',
-=======
           formatRupiah(cartItem.totalPrice),
->>>>>>> 4b4643c79c9fb21632c1805183f166873a945885
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,

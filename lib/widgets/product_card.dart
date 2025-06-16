@@ -219,17 +219,10 @@ class ProductCard extends StatelessWidget {
   }
 
   Widget _buildPrice() {
-<<<<<<< HEAD
-    final formatter = NumberFormat('#,###', 'id_ID');
-
-    return Text(
-      'Rp${formatter.format(product.price)}',
-=======
     final formattedPrice = formatRupiah(product.price);
 
     return Text(
       formattedPrice,
->>>>>>> 4b4643c79c9fb21632c1805183f166873a945885
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,

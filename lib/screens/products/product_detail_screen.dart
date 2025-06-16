@@ -411,11 +411,7 @@ List<Map<String, dynamic>> get _sampleReviews => [
           ),
           const SizedBox(height: 16),
           Text(
-<<<<<<< HEAD
-            formatter.format(_product!.price),
-=======
             formatRupiah(_product!.price),
->>>>>>> 4b4643c79c9fb21632c1805183f166873a945885
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -772,11 +768,7 @@ List<Map<String, dynamic>> get _sampleReviews => [
                               ),
                               const SizedBox(height: 4),
                               Text(
-<<<<<<< HEAD
-                                'Rp${formatter.format(product.price)}',
-=======
                                 formatRupiah(product.price),
->>>>>>> 4b4643c79c9fb21632c1805183f166873a945885
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -836,11 +828,7 @@ List<Map<String, dynamic>> get _sampleReviews => [
                   ),
                 ),
                 Text(
-<<<<<<< HEAD
-                  currencyFormatter.format(_product!.price),
-=======
                   formatRupiah(_product!.price * _quantity),
->>>>>>> 4b4643c79c9fb21632c1805183f166873a945885
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
