@@ -170,47 +170,50 @@ class ProfileScreen extends StatelessWidget {
             Navigator.pushNamed(context, '/wishlist');
           },
         ),
-        _buildMenuItem(
-          icon: Icons.location_on_outlined,
-          title: 'Addresses',
-          subtitle: 'Manage shipping addresses',
-          onTap: () {
-            // TODO: Navigate to addresses screen
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Addresses screen coming soon!')),
-            );
-          },
-        ),
-        _buildMenuItem(
-          icon: Icons.payment_outlined,
-          title: 'Payment Methods',
-          subtitle: 'Manage your payment options',
-          onTap: () {
-            // TODO: Navigate to payment methods screen
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Payment methods screen coming soon!')),
-            );
-          },
-        ),
-        _buildMenuItem(
-          icon: Icons.help_outline,
-          title: 'Help & Support',
-          subtitle: 'Get help with your orders',
-          onTap: () {
-            // TODO: Navigate to help screen
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Help screen coming soon!')),
-            );
-          },
-        ),
-        _buildMenuItem(
-          icon: Icons.info_outline,
-          title: 'About',
-          subtitle: 'Learn more about LokaLivi',
-          onTap: () {
-            _showAboutDialog(context);
-          },
-        ),
+        // _buildMenuItem(
+        //   icon: Icons.location_on_outlined,
+        //   title: 'Addresses',
+        //   subtitle: 'Manage shipping addresses',
+        //   onTap: () {
+        //     // TODO: Navigate to addresses screen
+        //     ScaffoldMessenger.of(context).showSnackBar(
+        //       const SnackBar(content: Text('Addresses screen coming soon!')),
+        //     );
+        //   },
+        // ),
+
+        // _buildMenuItem(
+        //   icon: Icons.payment_outlined,
+        //   title: 'Payment Methods',
+        //   subtitle: 'Manage your payment options',
+        //   onTap: () {
+        //     // TODO: Navigate to payment methods screen
+        //     ScaffoldMessenger.of(context).showSnackBar(
+        //       const SnackBar(content: Text('Payment methods screen coming soon!')),
+        //     );
+        //   },
+        // ),
+
+        // _buildMenuItem(
+        //   icon: Icons.help_outline,
+        //   title: 'Help & Support',
+        //   subtitle: 'Get help with your orders',
+        //   onTap: () {
+        //     // TODO: Navigate to help screen
+        //     ScaffoldMessenger.of(context).showSnackBar(
+        //       const SnackBar(content: Text('Help screen coming soon!')),
+        //     );
+        //   },
+        // ),
+
+        // _buildMenuItem(
+        //   icon: Icons.info_outline,
+        //   title: 'About',
+        //   subtitle: 'Learn more about LokaLivi',
+        //   onTap: () {
+        //     _showAboutDialog(context);
+        //   },
+        // ),
         const SizedBox(height: 16),
         _buildLogoutButton(context),
       ],
