@@ -189,15 +189,6 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  Widget _buildName() {
-    return Text(
-      product.name,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
   Widget _buildRating() {
     if (product.rating == 0) return const SizedBox.shrink();
 
@@ -214,19 +205,6 @@ class ProductCard extends StatelessWidget {
           style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
       ],
-    );
-  }
-
-  Widget _buildPrice() {
-    final formattedPrice = formatRupiah(product.price);
-
-    return Text(
-      formattedPrice,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: AppTheme.primaryColor,
-      ),
     );
   }
 
