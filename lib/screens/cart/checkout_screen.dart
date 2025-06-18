@@ -6,6 +6,19 @@ import '../../providers/auth_provider.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/checkout_step.dart';
 
+  enum PaymentMethod { bankTransfer, shopeePay, gopay, dana, ovo }
+  enum BankOption {
+    bni,
+    bri,
+    bca,
+    mandiri,
+    jago,
+    seabank,
+    permata,
+    bsi,
+    cimb
+  }
+
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
 
@@ -19,7 +32,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   
   // Form controllers
   final _shippingFormKey = GlobalKey<FormState>();
-  final _paymentFormKey = GlobalKey<FormState>();
   
   // Shipping form controllers
   final _nameController = TextEditingController();
@@ -216,50 +228,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               },
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _cityController,
-                    decoration: const InputDecoration(
-                      labelText: 'City',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter city';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _stateController,
-                    decoration: const InputDecoration(
-                      labelText: 'State',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter state';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
             TextFormField(
               controller: _zipController,
               decoration: const InputDecoration(
-                labelText: 'ZIP Code',
+                labelText: 'Post Code',
                 prefixIcon: Icon(Icons.location_on),
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter ZIP code';
+                  return 'Please enter post code';
                 }
                 return null;
               },
@@ -270,83 +248,138 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  PaymentMethod? _selectedPaymentMethod;
+  BankOption? _selectedBank;
+
   Widget _buildPaymentStep() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      child: Form(
-        key: _paymentFormKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Payment Information',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 24),
-            TextFormField(
-              controller: _cardHolderController,
-              decoration: const InputDecoration(
-                labelText: 'Cardholder Name',
-                prefixIcon: Icon(Icons.person),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter cardholder name';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _cardNumberController,
-              decoration: const InputDecoration(
-                labelText: 'Card Number',
-                prefixIcon: Icon(Icons.credit_card),
-                hintText: '1234 5678 9012 3456',
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter card number';
-                }
-                if (value.length < 16) {
-                  return 'Please enter a valid card number';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Metode Pembayaran',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 24),
+
+          // Transfer Bank
+          GestureDetector(
+            onTap: () => setState(() => _selectedPaymentMethod = PaymentMethod.bankTransfer),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              margin: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                border: Border.all(
+                  color: _selectedPaymentMethod == PaymentMethod.bankTransfer
+                      ? AppTheme.primaryColor
+                      : Colors.grey.shade400,
+                ),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.shade200),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.security, color: Colors.blue.shade700),
+                  const Icon(Icons.account_balance),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Your payment information is secure and encrypted',
-                      style: TextStyle(
-                        color: Colors.blue.shade700,
-                        fontSize: 14,
-                      ),
-                    ),
+                  const Expanded(child: Text("Transfer Bank")),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: _selectedPaymentMethod == PaymentMethod.bankTransfer
+                        ? AppTheme.primaryColor
+                        : Colors.grey,
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          // List bank muncul kalau Transfer Bank dipilih
+          if (_selectedPaymentMethod == PaymentMethod.bankTransfer)
+            Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: 250, // batasi tinggi maksimal agar bisa discroll
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: BankOption.values.map((bank) {
+                    final bankNames = {
+                      BankOption.bni: "Bank BNI",
+                      BankOption.bri: "Bank BRI",
+                      BankOption.bca: "Bank BCA",
+                      BankOption.mandiri: "Bank Mandiri",
+                      BankOption.jago: "Bank Jago",
+                      BankOption.seabank: "SeaBank",
+                      BankOption.permata: "Bank Permata",
+                      BankOption.bsi: "Bank Syariah Indonesia",
+                      BankOption.cimb: "Bank CIMB Niaga",
+                    };
+                    return RadioListTile<BankOption>(
+                      dense: true,
+                      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        bankNames[bank]!,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      value: bank,
+                      groupValue: _selectedBank,
+                      onChanged: (value) => setState(() => _selectedBank = value),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+
+          // Metode lain
+          ...[
+            PaymentMethod.shopeePay,
+            PaymentMethod.gopay,
+            PaymentMethod.dana,
+            PaymentMethod.ovo,
+          ].map((method) {
+            final labels = {
+              PaymentMethod.shopeePay: "ShopeePay",
+              PaymentMethod.gopay: "Gopay",
+              PaymentMethod.dana: "Dana",
+              PaymentMethod.ovo: "OVO",
+            };
+            return GestureDetector(
+              onTap: () => setState(() => _selectedPaymentMethod = method),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: _selectedPaymentMethod == method
+                        ? AppTheme.primaryColor
+                        : Colors.grey.shade400,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Radio<PaymentMethod>(
+                      value: method,
+                      groupValue: _selectedPaymentMethod,
+                      onChanged: (value) => setState(() => _selectedPaymentMethod = value),
+                      activeColor: AppTheme.primaryColor,
+                      visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(labels[method]!),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }
+
 
   Widget _buildReviewStep() {
     return Consumer<CartProvider>(
@@ -469,6 +502,48 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget _buildPaymentInfo() {
+    String paymentMethodText = '';
+    IconData paymentIcon = Icons.payment;
+    
+    if (_selectedPaymentMethod != null) {
+      switch (_selectedPaymentMethod!) {
+        case PaymentMethod.bankTransfer:
+          paymentMethodText = 'Transfer Bank';
+          if (_selectedBank != null) {
+            final bankNames = {
+              BankOption.bni: "Bank BNI",
+              BankOption.bri: "Bank BRI",
+              BankOption.bca: "Bank BCA",
+              BankOption.mandiri: "Bank Mandiri",
+              BankOption.jago: "Bank Jago",
+              BankOption.seabank: "SeaBank",
+              BankOption.permata: "Bank Permata",
+              BankOption.bsi: "Bank Syariah Indonesia",
+              BankOption.cimb: "Bank CIMB Niaga",
+            };
+            paymentMethodText = bankNames[_selectedBank!]!;
+          }
+          paymentIcon = Icons.account_balance;
+          break;
+        case PaymentMethod.shopeePay:
+          paymentMethodText = 'ShopeePay';
+          paymentIcon = Icons.wallet;
+          break;
+        case PaymentMethod.gopay:
+          paymentMethodText = 'Gopay';
+          paymentIcon = Icons.wallet;
+          break;
+        case PaymentMethod.dana:
+          paymentMethodText = 'Dana';
+          paymentIcon = Icons.wallet;
+          break;
+        case PaymentMethod.ovo:
+          paymentMethodText = 'OVO';
+          paymentIcon = Icons.wallet;
+          break;
+      }
+    }
+    
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -485,9 +560,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.credit_card),
+                Icon(paymentIcon),
                 const SizedBox(width: 8),
-                Text('**** **** **** ${_cardNumberController.text.length > 4 ? _cardNumberController.text.substring(_cardNumberController.text.length - 4) : "****"}'),
+                Text(paymentMethodText.isEmpty ? 'Belum dipilih' : paymentMethodText),
               ],
             ),
           ],
@@ -546,12 +621,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         );
       }
     } else if (_currentStep == 1) {
-      if (_paymentFormKey.currentState!.validate()) {
-        _pageController.nextPage(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
+      // Ganti validasi form dengan validasi payment method
+      if (_selectedPaymentMethod == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pilih metode pembayaran terlebih dahulu')),
         );
+        return;
       }
+      // Jika bank transfer dipilih, pastikan bank juga dipilih
+      if (_selectedPaymentMethod == PaymentMethod.bankTransfer && _selectedBank == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pilih bank untuk transfer')),
+        );
+        return;
+      }
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     } else if (_currentStep == 2) {
       _placeOrder();
     }
