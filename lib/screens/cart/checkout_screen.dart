@@ -32,7 +32,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   
   // Form controllers
   final _shippingFormKey = GlobalKey<FormState>();
-  final _paymentFormKey = GlobalKey<FormState>();
   
   // Shipping form controllers
   final _nameController = TextEditingController();
