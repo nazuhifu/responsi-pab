@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils/formatter.dart';
 import 'package:provider/provider.dart';
+import '../../providers/order_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/app_theme.dart';
@@ -644,8 +645,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  void _placeOrder() {
-    // Simulate order placement
+  void _placeOrder() async {
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+    if (!authProvider.isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Silakan masuk terlebih dahulu')),
+      );
+      return;
+    }
+
+    // Validate payment method
+    if (_selectedPaymentMethod == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pilih metode pembayaran terlebih dahulu')),
+      );
+      return;
+    }
+
+    if (_selectedPaymentMethod == PaymentMethod.bankTransfer && _selectedBank == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pilih bank untuk transfer')),
+      );
+      return;
+    }
+
+    // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -654,19 +681,80 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
 
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      final shipping = cartProvider.totalAmount > 100 ? 0.0 : 9.99;
+      final total = cartProvider.totalAmount + shipping;
+
+      // Prepare payment method string
+      String paymentMethodText = '';
+      String? bankName;
+      
+      switch (_selectedPaymentMethod!) {
+        case PaymentMethod.bankTransfer:
+          paymentMethodText = 'Transfer Bank';
+          if (_selectedBank != null) {
+            final bankNames = {
+              BankOption.bni: "Bank BNI",
+              BankOption.bri: "Bank BRI",
+              BankOption.bca: "Bank BCA",
+              BankOption.mandiri: "Bank Mandiri",
+              BankOption.jago: "Bank Jago",
+              BankOption.seabank: "SeaBank",
+              BankOption.permata: "Bank Permata",
+              BankOption.bsi: "Bank Syariah Indonesia",
+              BankOption.cimb: "Bank CIMB Niaga",
+            };
+            bankName = bankNames[_selectedBank!];
+          }
+          break;
+        case PaymentMethod.shopeePay:
+          paymentMethodText = 'ShopeePay';
+          break;
+        case PaymentMethod.gopay:
+          paymentMethodText = 'Gopay';
+          break;
+        case PaymentMethod.dana:
+          paymentMethodText = 'Dana';
+          break;
+        case PaymentMethod.ovo:
+          paymentMethodText = 'OVO';
+          break;
+      }
+
+      // Prepare shipping address
+      final shippingAddress = {
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'address': _addressController.text.trim(),
+        'city': _cityController.text.trim(),
+        'state': _stateController.text.trim(),
+        'zipCode': _zipController.text.trim(),
+      };
+
+      // Create order in Firebase
+      await orderProvider.createOrder(
+        userId: authProvider.user!.id,
+        items: cartProvider.items,
+        totalAmount: total,
+        shippingCost: shipping,
+        paymentMethod: paymentMethodText,
+        bankName: bankName,
+        shippingAddress: shippingAddress,
+      );
+
       Navigator.of(context).pop(); // Close loading dialog
       
       // Clear cart
-      Provider.of<CartProvider>(context, listen: false).clearCart();
+      cartProvider.clearCart();
       
       // Show success dialog
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          title: const Text('Order Placed!'),
-          content: const Text('Your order has been placed successfully. You will receive a confirmation email shortly.'),
+          title: const Text('Pesanan Berhasil!'),
+          content: const Text('Pesanan Anda telah berhasil dibuat. Anda akan menerima email konfirmasi segera.'),
           actions: [
             TextButton(
               onPressed: () {
@@ -681,6 +769,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ],
         ),
       );
-    });
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading dialog
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal membuat pesanan: ${e.toString()}')),
+      );
+    }
   }
 }

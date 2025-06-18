@@ -14,12 +14,15 @@ import 'screens/profile/profile_screen.dart';
 import 'screens/wishlist_screen.dart';
 import 'screens/categories_screen.dart';
 import 'screens/search_screen.dart';
+import 'screens/orders/orders_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/wishlist_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/order_provider.dart';
 import 'utils/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +45,7 @@ class LokaLiviApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -65,6 +69,7 @@ class LokaLiviApp extends StatelessWidget {
               '/wishlist': (context) => const WishlistScreen(),
               '/categories': (context) => const CategoriesScreen(),
               '/search': (context) => const SearchScreen(),
+              '/orders': (context) => const OrdersScreen(),
             },
             onGenerateRoute: (settings) {
               if (settings.name == '/product-detail') {

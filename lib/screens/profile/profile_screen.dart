@@ -123,7 +123,7 @@ class ProfileScreen extends StatelessWidget {
           title: 'My Orders',
           subtitle: 'View your order history',
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Orders screen coming soon!')));
+            Navigator.pushNamed(context, '/orders'); // Ganti ini
           },
         ),
         _buildMenuItem(
