@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
@@ -31,7 +33,7 @@ class ProfileScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _buildProfileHeader(auth.user!),
+                _buildProfileHeader(context, auth),
                 const SizedBox(height: 24),
                 _buildMenuSection(context),
               ],
@@ -47,39 +49,19 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.person_outline,
-            size: 80,
-            color: Colors.grey.shade400,
-          ),
+          Icon(Icons.person_outline, size: 80, color: Colors.grey.shade400),
           const SizedBox(height: 16),
-          const Text(
-            'Welcome to LokaLivi',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          const Text('Welcome to LokaLivi', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          const Text(
-            'Sign in to access your profile and orders',
-            style: TextStyle(
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          const Text('Sign in to access your profile and orders', style: TextStyle(color: Colors.grey), textAlign: TextAlign.center),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/login');
-            },
+            onPressed: () => Navigator.pushNamed(context, '/login'),
             child: const Text('Sign In'),
           ),
           const SizedBox(height: 12),
           TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/register');
-            },
+            onPressed: () => Navigator.pushNamed(context, '/register'),
             child: const Text('Create Account'),
           ),
         ],
@@ -87,7 +69,9 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(user) {
+  Widget _buildProfileHeader(BuildContext context, AuthProvider auth) {
+    final user = auth.user!;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -96,50 +80,33 @@ class ProfileScreen extends StatelessWidget {
             CircleAvatar(
               radius: 30,
               backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
-              child: Text(
-                user.name[0].toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryColor,
-                ),
-              ),
+              backgroundImage: user.avatar != null && user.avatar!.isNotEmpty
+                  ? MemoryImage(base64Decode(user.avatar!))
+                  : null,
+              child: (user.avatar == null || user.avatar!.isEmpty)
+                  ? Text(
+                      user.name[0].toUpperCase(),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                    )
+                  : null,
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    user.name,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Text(user.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  Text(
-                    user.email,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
+                  Text(user.email, style: const TextStyle(color: Colors.grey)),
                   if (user.phone.isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Text(
-                      user.phone,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
+                    Text(user.phone, style: const TextStyle(color: Colors.grey)),
                   ],
                 ],
               ),
             ),
             IconButton(
-              onPressed: () {
-                _showEditProfileDialog(user);
-              },
+              onPressed: () => _showEditProfileDialog(context, auth),
               icon: const Icon(Icons.edit),
             ),
           ],
@@ -156,64 +123,15 @@ class ProfileScreen extends StatelessWidget {
           title: 'My Orders',
           subtitle: 'View your order history',
           onTap: () {
-            // TODO: Navigate to orders screen
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Orders screen coming soon!')),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Orders screen coming soon!')));
           },
         ),
         _buildMenuItem(
           icon: Icons.favorite_outline,
           title: 'Wishlist',
           subtitle: 'Your saved items',
-          onTap: () {
-            Navigator.pushNamed(context, '/wishlist');
-          },
+          onTap: () => Navigator.pushNamed(context, '/wishlist'),
         ),
-        // _buildMenuItem(
-        //   icon: Icons.location_on_outlined,
-        //   title: 'Addresses',
-        //   subtitle: 'Manage shipping addresses',
-        //   onTap: () {
-        //     // TODO: Navigate to addresses screen
-        //     ScaffoldMessenger.of(context).showSnackBar(
-        //       const SnackBar(content: Text('Addresses screen coming soon!')),
-        //     );
-        //   },
-        // ),
-
-        // _buildMenuItem(
-        //   icon: Icons.payment_outlined,
-        //   title: 'Payment Methods',
-        //   subtitle: 'Manage your payment options',
-        //   onTap: () {
-        //     // TODO: Navigate to payment methods screen
-        //     ScaffoldMessenger.of(context).showSnackBar(
-        //       const SnackBar(content: Text('Payment methods screen coming soon!')),
-        //     );
-        //   },
-        // ),
-
-        // _buildMenuItem(
-        //   icon: Icons.help_outline,
-        //   title: 'Help & Support',
-        //   subtitle: 'Get help with your orders',
-        //   onTap: () {
-        //     // TODO: Navigate to help screen
-        //     ScaffoldMessenger.of(context).showSnackBar(
-        //       const SnackBar(content: Text('Help screen coming soon!')),
-        //     );
-        //   },
-        // ),
-
-        // _buildMenuItem(
-        //   icon: Icons.info_outline,
-        //   title: 'About',
-        //   subtitle: 'Learn more about LokaLivi',
-        //   onTap: () {
-        //     _showAboutDialog(context);
-        //   },
-        // ),
         const SizedBox(height: 16),
         _buildLogoutButton(context),
       ],
@@ -242,70 +160,101 @@ class ProfileScreen extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: () {
-          _showLogoutDialog(context);
-        },
+        onPressed: () => _showLogoutDialog(context),
         icon: const Icon(Icons.logout, color: Colors.red),
-        label: const Text(
-          'Sign Out',
-          style: TextStyle(color: Colors.red),
-        ),
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.red),
-        ),
+        label: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+        style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
       ),
     );
   }
 
-  void _showEditProfileDialog(user) {
-    // TODO: Implement edit profile dialog
+  void _showEditProfileDialog(BuildContext context, AuthProvider auth) {
+    final user = auth.user!;
+    final nameController = TextEditingController(text: user.name);
+    String? base64Image = user.avatar;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Profile'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  final picker = ImagePicker();
+                  final picked = await picker.pickImage(source: ImageSource.gallery);
+                  if (picked != null) {
+                    final imageBytes = await picked.readAsBytes();
+                    setState(() {
+                      base64Image = base64Encode(imageBytes);
+                    });
+                  }
+                },
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundImage: base64Image != null && base64Image!.isNotEmpty
+                      ? MemoryImage(base64Decode(base64Image!))
+                      : null,
+                  child: (base64Image == null || base64Image!.isEmpty)
+                      ? const Icon(Icons.camera_alt)
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final newName = nameController.text.trim();
+
+                await auth.updateProfile(
+                  name: newName,
+                  avatar: base64Image,
+                );
+
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showSettingsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Settings',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+        builder: (context, themeProvider, child) => Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: Icon(themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode),
+                title: const Text('Dark Mode'),
+                trailing: Switch(
+                  value: themeProvider.isDarkMode,
+                  onChanged: (value) => themeProvider.toggleTheme(),
                 ),
-                const SizedBox(height: 16),
-                ListTile(
-                  leading: Icon(
-                    themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                  ),
-                  title: const Text('Dark Mode'),
-                  trailing: Switch(
-                    value: themeProvider.isDarkMode,
-                    onChanged: (value) {
-                      themeProvider.toggleTheme();
-                    },
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.notifications),
-                  title: const Text('Notifications'),
-                  trailing: Switch(
-                    value: true, // TODO: Implement notification settings
-                    onChanged: (value) {
-                      // TODO: Handle notification toggle
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -318,50 +267,19 @@ class ProfileScreen extends StatelessWidget {
         content: const Text('Are you sure you want to sign out?'),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
               Provider.of<AuthProvider>(context, listen: false).logout();
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                '/home',
-                (route) => false,
-              );
+              Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
             },
             child: const Text('Sign Out'),
           ),
         ],
       ),
-    );
-  }
-
-  void _showAboutDialog(BuildContext context) {
-    showAboutDialog(
-      context: context,
-      applicationName: 'LokaLivi',
-      applicationVersion: '1.0.0',
-      applicationIcon: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: AppTheme.primaryColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(
-          Icons.home_filled,
-          color: Colors.white,
-          size: 30,
-        ),
-      ),
-      children: [
-        const Text('Timeless Furniture for Modern Living'),
-        const SizedBox(height: 16),
-        const Text('LokaLivi brings you handcrafted furniture that blends traditional craftsmanship with contemporary design.'),
-      ],
     );
   }
 }

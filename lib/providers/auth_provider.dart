@@ -119,14 +119,16 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateProfile(String name, String email, String phone) async {
+  Future<void> updateProfile({
+    required String name,
+    String? avatar,
+  }) async {
     if (_user != null) {
       await _auth.currentUser?.updateDisplayName(name);
 
       _user = _user!.copyWith(
         name: name,
-        email: email,
-        phone: phone,
+        avatar: avatar ?? _user!.avatar,
       );
 
       await _firestore.collection('users').doc(_user!.id).update(_user!.toJson());
