@@ -29,6 +29,21 @@ class Product {
     this.isInCart = false,
   });
 
+  // Constructor untuk produk kosong/placeholder
+  Product.empty({required this.id})
+    : name = '',
+      category = '',
+      price = 0.0,
+      description = '',
+      images = const [],
+      rating = 0.0,
+      reviewCount = 0,
+      stock = 0,
+      features = const [],
+      specifications = const {},
+      isInWishlist = false,
+      isInCart = false;
+
   Product copyWith({
     String? id,
     String? name,
@@ -81,7 +96,7 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'].toString(),
+      id: json['id']?.toString() ?? '',
       name: json['name'] ?? '',
       category: json['category'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
@@ -97,10 +112,10 @@ class Product {
     );
   }
 
-  /// ✅ Factory ini digunakan saat membaca dari Firebase Firestore
+  /// Factory untuk membaca dari Firebase Firestore
   factory Product.fromFirestore(Map<String, dynamic> data) {
     return Product(
-      id: data['id'].toString(),
+      id: data['id']?.toString() ?? '',
       name: data['name'] ?? '',
       category: data['category'] ?? '',
       price: (data['price'] ?? 0).toDouble(),
@@ -115,5 +130,36 @@ class Product {
       isInWishlist: false, // nilai ini bisa diatur di app
       isInCart: false,     // nilai ini juga
     );
+  }
+
+  /// Method untuk konversi ke Firestore (tanpa status wishlist/cart)
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category,
+      'price': price,
+      'description': description,
+      'images': images,
+      'rating': rating,
+      'reviewCount': reviewCount,
+      'stock': stock,
+      'features': features,
+      'specifications': specifications,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Product && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  String toString() {
+    return 'Product(id: $id, name: $name, price: $price, stock: $stock)';
   }
 }

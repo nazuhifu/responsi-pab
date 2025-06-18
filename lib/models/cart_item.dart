@@ -30,6 +30,7 @@ class CartItem {
     );
   }
 
+  // JSON serialization untuk penyimpanan umum atau transfer data
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -41,17 +42,25 @@ class CartItem {
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
     final addedAtRaw = json['addedAt'];
+    DateTime parsedDate;
+    
+    if (addedAtRaw is Timestamp) {
+      parsedDate = addedAtRaw.toDate();
+    } else if (addedAtRaw is String) {
+      parsedDate = DateTime.parse(addedAtRaw);
+    } else {
+      parsedDate = DateTime.now(); // fallback
+    }
+
     return CartItem(
-      id: json['id'],
+      id: json['id'] ?? '',
       product: Product.fromJson(json['product']),
-      quantity: json['quantity'],
-      addedAt: addedAtRaw is Timestamp
-          ? addedAtRaw.toDate()
-          : DateTime.parse(addedAtRaw),
+      quantity: json['quantity'] ?? 1,
+      addedAt: parsedDate,
     );
   }
 
-  /// Untuk disimpan ke Firestore (tidak menyimpan full produk)
+  // Untuk disimpan ke Firestore (hanya menyimpan referensi produk)
   Map<String, dynamic> toFirestore() {
     return {
       'productId': product.id,
@@ -60,14 +69,53 @@ class CartItem {
     };
   }
 
-  /// Untuk mengambil dari Firestore + ambil `Product` secara terpisah
+  // Untuk mengambil dari Firestore dengan produk yang sudah diambil terpisah
   factory CartItem.fromFirestore(
-      Map<String, dynamic> json, Product fullProduct) {
+    Map<String, dynamic> json, 
+    Product fullProduct, {
+    String? documentId,
+  }) {
     return CartItem(
-      id: json['id'],
+      id: documentId ?? json['id'] ?? '',
       product: fullProduct,
-      quantity: json['quantity'],
-      addedAt: (json['addedAt'] as Timestamp).toDate(),
+      quantity: json['quantity'] ?? 1,
+      addedAt: json['addedAt'] is Timestamp 
+        ? (json['addedAt'] as Timestamp).toDate()
+        : DateTime.now(),
     );
+  }
+
+  // Untuk mengambil dari Firestore tanpa produk lengkap (hanya ID)
+  factory CartItem.fromFirestoreMinimal(
+    Map<String, dynamic> json, {
+    String? documentId,
+  }) {
+    return CartItem(
+      id: documentId ?? json['id'] ?? '',
+      product: Product.empty(id: json['productId'] ?? ''),
+      quantity: json['quantity'] ?? 1,
+      addedAt: json['addedAt'] is Timestamp 
+        ? (json['addedAt'] as Timestamp).toDate()
+        : DateTime.now(),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is CartItem &&
+        other.id == id &&
+        other.product == product &&
+        other.quantity == quantity;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^ product.hashCode ^ quantity.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'CartItem(id: $id, product: ${product.name}, quantity: $quantity, totalPrice: $totalPrice)';
   }
 }
