@@ -267,14 +267,16 @@ class ProfileScreen extends StatelessWidget {
         content: const Text('Are you sure you want to sign out?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Provider.of<AuthProvider>(context, listen: false).logout();
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+              await authProvider.logout(context);
+
+              if (!navigator.mounted) return;
+
+              navigator.pop();
+              navigator.pushNamedAndRemoveUntil('/home', (route) => false);
             },
             child: const Text('Sign Out'),
           ),

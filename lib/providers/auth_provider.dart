@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+
 import '../models/user.dart';
+import '../providers/cart_provider.dart';
+import '../providers/wishlist_provider.dart';
 
 class AuthProvider with ChangeNotifier {
   final fb_auth.FirebaseAuth _auth = fb_auth.FirebaseAuth.instance;
@@ -46,9 +50,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String email, String password, BuildContext context) async {
     _isLoading = true;
     notifyListeners();
+
+    final mounted = context.mounted;
+
     try {
       final credential = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -61,6 +68,12 @@ class AuthProvider with ChangeNotifier {
         if (doc.exists) {
           _user = User.fromJson(doc.data()!);
           notifyListeners();
+
+          if (mounted) {
+            await Provider.of<CartProvider>(context, listen: false).loadCartFromFirestore();
+            await Provider.of<WishlistProvider>(context, listen: false).loadWishlistFromFirestore();
+          }
+
           return true;
         }
       }
@@ -74,9 +87,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> register(String name, String email, String password) async {
+  Future<bool> register(String name, String email, String password, BuildContext context) async {
     _isLoading = true;
     notifyListeners();
+
+    final mounted = context.mounted;
+
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -84,7 +100,8 @@ class AuthProvider with ChangeNotifier {
       );
 
       await credential.user?.updateDisplayName(name);
-      await credential.user?.reload(); // memastikan displayName langsung update
+      await credential.user?.reload();
+
       final fbUser = _auth.currentUser;
 
       if (fbUser != null) {
@@ -101,6 +118,12 @@ class AuthProvider with ChangeNotifier {
 
         _user = newUser;
         notifyListeners();
+
+        if (mounted) {
+          await Provider.of<CartProvider>(context, listen: false).loadCartFromFirestore();
+          await Provider.of<WishlistProvider>(context, listen: false).loadWishlistFromFirestore();
+        }
+
         return true;
       }
       return false;
@@ -113,10 +136,15 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     await _auth.signOut();
     _user = null;
     notifyListeners();
+
+    if (context.mounted) {
+      Provider.of<CartProvider>(context, listen: false).reset();
+      Provider.of<WishlistProvider>(context, listen: false).reset();
+    }
   }
 
   Future<void> updateProfile({
