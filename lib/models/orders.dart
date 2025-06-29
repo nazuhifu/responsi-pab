@@ -44,7 +44,7 @@ class Order {
 
   factory Order.fromJson(String id, Map<String, dynamic> json) {
     return Order(
-      id: id, // <-- ini pakai doc.id dari luar
+      id: id,
       userId: json['userId'],
       items: (json['items'] as List)
           .map((item) => CartItem.fromJson(item))

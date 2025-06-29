@@ -259,7 +259,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Metode Pembayaran',
+            'Payment Method',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
@@ -282,7 +282,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 children: [
                   const Icon(Icons.account_balance),
                   const SizedBox(width: 12),
-                  const Expanded(child: Text("Transfer Bank")),
+                  const Expanded(child: Text("Bank Transfer")),
                   Icon(
                     Icons.arrow_drop_down,
                     color: _selectedPaymentMethod == PaymentMethod.bankTransfer
@@ -494,7 +494,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 8),
             Text(_nameController.text),
             Text(_addressController.text),
-            Text('${_cityController.text} ${_stateController.text} ${_zipController.text}'),
+            Text(_zipController.text),
             Text(_phoneController.text),
           ],
         ),

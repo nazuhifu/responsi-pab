@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       setState(() {
-        _featuredProducts = products.take(6).toList(); // ambil 6 produk teratas
+        _featuredProducts = products.take(6).toList();
         _categories = uniqueCategories.toList();
         _isLoading = false;
       });
