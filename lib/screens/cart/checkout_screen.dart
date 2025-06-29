@@ -266,7 +266,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
           // Transfer Bank
           GestureDetector(
-            onTap: () => setState(() => _selectedPaymentMethod = PaymentMethod.bankTransfer),
+            onTap: () => setState(() {
+              if (_selectedPaymentMethod == PaymentMethod.bankTransfer) {
+                _selectedPaymentMethod = null;
+                _selectedBank = null;
+              } else {
+                _selectedPaymentMethod = PaymentMethod.bankTransfer;
+              }
+            }),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               margin: const EdgeInsets.only(bottom: 8),
@@ -284,7 +291,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   const SizedBox(width: 12),
                   const Expanded(child: Text("Bank Transfer")),
                   Icon(
-                    Icons.arrow_drop_down,
+                    _selectedPaymentMethod == PaymentMethod.bankTransfer
+                        ? Icons.arrow_drop_up
+                        : Icons.arrow_drop_down,
                     color: _selectedPaymentMethod == PaymentMethod.bankTransfer
                         ? AppTheme.primaryColor
                         : Colors.grey,
@@ -299,9 +308,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 16),
               child: Container(
-                constraints: BoxConstraints(
-                  maxHeight: 250, 
-                ),
                 child: ListView(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
