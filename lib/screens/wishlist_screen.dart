@@ -32,19 +32,25 @@ class WishlistScreen extends StatelessWidget {
           }
 
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: SizedBox(
-              height: 310,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: wishlist.items.length,
-                itemBuilder: (context, index) {
-                  final product = wishlist.items[index];
-                  return Container(
-                    margin: const EdgeInsets.only(right: 16),
-                    width: 190,
-                    child: ProductCard(
+            padding: const EdgeInsets.all(16),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                int crossAxisCount = (constraints.maxWidth ~/ 200).clamp(2, 4);
+                double itemWidth = constraints.maxWidth / crossAxisCount;
+                double itemHeight = itemWidth * 1.7;
+                double childAspectRatio = itemWidth / itemHeight;
+
+                return GridView.builder(
+                  itemCount: wishlist.items.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: childAspectRatio,
+                  ),
+                  itemBuilder: (context, index) {
+                    final product = wishlist.items[index];
+                    return ProductCard(
                       product: product,
                       onTap: () {
                         Navigator.pushNamed(
@@ -53,10 +59,10 @@ class WishlistScreen extends StatelessWidget {
                           arguments: {'productId': product.id},
                         );
                       },
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                );
+              },
             ),
           );
         },

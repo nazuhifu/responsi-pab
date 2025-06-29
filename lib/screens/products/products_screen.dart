@@ -32,7 +32,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     
-    // Ambil arguments dari navigasi
     final arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     
     if (arguments != null) {
@@ -57,7 +56,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
       setState(() {
         _products = products;
-        _filterProducts(); // Filter setelah data dimuat
+        _filterProducts();
         _isLoading = false;
       });
     } catch (e) {
@@ -257,12 +256,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
       itemBuilder: (context, index) {
         final product = _filteredProducts[index];
         
-        // Siapkan widget gambar
         Widget imageWidget;
         if (product.images.isNotEmpty) {
           final image = product.images.first;
           
-          // Jika gambar berformat base64
           if (image.startsWith('data:image')) {
             try {
               final base64Str = image.split(',').last;
@@ -278,7 +275,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
               imageWidget = const Icon(Icons.chair, color: Colors.grey);
             }
           } 
-          // Jika gambar berformat URL network
           else {
             imageWidget = Image.network(
               image,
