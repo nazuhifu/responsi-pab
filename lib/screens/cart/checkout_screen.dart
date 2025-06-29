@@ -232,13 +232,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             TextFormField(
               controller: _zipController,
               decoration: const InputDecoration(
-                labelText: 'Post Code',
+                labelText: 'ZIP Code',
                 prefixIcon: Icon(Icons.location_on),
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter post code';
+                  return 'Please enter ZIP code';
                 }
                 return null;
               },

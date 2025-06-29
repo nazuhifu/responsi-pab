@@ -34,6 +34,7 @@ class ProductCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 _buildImage(),
                 Expanded(
