@@ -29,7 +29,7 @@ class Category {
       id: json['id'],
       name: json['name'],
       description: json['description'],
-      icon: Icons.category, // Default icon
+      icon: Icons.category,
       productCount: json['productCount'] ?? 0,
     );
   }

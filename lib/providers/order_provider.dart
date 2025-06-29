@@ -30,25 +30,21 @@ class OrderProvider with ChangeNotifier {
         final data = doc.data();
         final itemsRaw = data['items'] as List;
 
-        // Ambil semua productId dari item
         final productIds = itemsRaw.map((item) {
           final productMap = item['product'];
           return productMap != null ? productMap['id'] : null;
         }).whereType<String>().toSet().toList();
 
-        // Ambil data produk dari Firestore
         final productSnapshots = await _firestore
             .collection('products')
             .where(FieldPath.documentId, whereIn: productIds)
             .get();
 
-        // Map ID → Product
         final productMap = {
           for (var snap in productSnapshots.docs)
             snap.id: Product.fromFirestore(snap.data())
         };
 
-        // Konversi items jadi List<CartItem> dengan produk lengkap
         final cartItems = itemsRaw.map((itemJson) {
           final productJson = itemJson['product'];
           final productId = productJson?['id'] ?? '';
@@ -62,7 +58,6 @@ class OrderProvider with ChangeNotifier {
           );
         }).toList();
 
-        // Bangun Order
         final order = model.Order(
           id: doc.id,
           userId: data['userId'],

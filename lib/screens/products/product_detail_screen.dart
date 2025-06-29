@@ -38,7 +38,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Sample reviews data - defined once at class level
   final List<Map<String, dynamic>> _sampleReviews = [
     {
       'name': 'Sarah Johnson',
@@ -54,7 +53,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     },
   ];
 
-  // Calculate average rating from sample data
   double get _averageRating {
     if (_sampleReviews.isEmpty) return 0.0;
     return _sampleReviews.map((r) => r['rating'] as double).reduce((a, b) => a + b) / _sampleReviews.length;
@@ -124,7 +122,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       _reviews = reviewsSnapshot.docs.map((doc) {
         final data = doc.data();
 
-        // Tangani kemungkinan null pada createdAt
         final Timestamp? createdAt = data['createdAt'] is Timestamp
             ? data['createdAt']
             : null;
@@ -251,7 +248,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   _buildTabSection(),
                   const SizedBox(height: 20),
                   _buildRelatedProducts(),
-                  const SizedBox(height: 100), // Space for bottom buttons
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
@@ -297,7 +294,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         IconButton(
           icon: const Icon(Icons.share, color: Colors.white),
           onPressed: () {
-            // TODO: Implement share functionality
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Share feature coming soon!')),
             );

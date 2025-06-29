@@ -29,7 +29,6 @@ class Product {
     this.isInCart = false,
   });
 
-  // Constructor untuk produk kosong/placeholder
   Product.empty({required this.id})
     : name = '',
       category = '',
@@ -112,7 +111,6 @@ class Product {
     );
   }
 
-  /// Factory untuk membaca dari Firebase Firestore
   factory Product.fromFirestore(Map<String, dynamic> data) {
     return Product(
       id: data['id']?.toString() ?? '',
@@ -127,12 +125,11 @@ class Product {
       features: List<String>.from(data['features'] ?? []),
       specifications: Map<String, dynamic>.from(data['specifications'] ?? {})
           .map((k, v) => MapEntry(k, v.toString())),
-      isInWishlist: false, // nilai ini bisa diatur di app
-      isInCart: false,     // nilai ini juga
+      isInWishlist: false,
+      isInCart: false,
     );
   }
 
-  /// Method untuk konversi ke Firestore (tanpa status wishlist/cart)
   Map<String, dynamic> toFirestore() {
     return {
       'id': id,

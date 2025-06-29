@@ -30,7 +30,6 @@ class CartItem {
     );
   }
 
-  // JSON serialization untuk penyimpanan umum atau transfer data
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -49,7 +48,7 @@ class CartItem {
     } else if (addedAtRaw is String) {
       parsedDate = DateTime.parse(addedAtRaw);
     } else {
-      parsedDate = DateTime.now(); // fallback
+      parsedDate = DateTime.now();
     }
 
     return CartItem(
@@ -60,7 +59,6 @@ class CartItem {
     );
   }
 
-  // Untuk disimpan ke Firestore (hanya menyimpan referensi produk)
   Map<String, dynamic> toFirestore() {
     return {
       'productId': product.id,
@@ -69,7 +67,6 @@ class CartItem {
     };
   }
 
-  // Untuk mengambil dari Firestore dengan produk yang sudah diambil terpisah
   factory CartItem.fromFirestore(
     Map<String, dynamic> json, 
     Product fullProduct, {
@@ -85,7 +82,6 @@ class CartItem {
     );
   }
 
-  // Untuk mengambil dari Firestore tanpa produk lengkap (hanya ID)
   factory CartItem.fromFirestoreMinimal(
     Map<String, dynamic> json, {
     String? documentId,

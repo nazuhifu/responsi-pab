@@ -31,10 +31,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
   
-  // Form controllers
+  
   final _shippingFormKey = GlobalKey<FormState>();
   
-  // Shipping form controllers
+
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -43,7 +43,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _stateController = TextEditingController();
   final _zipController = TextEditingController();
   
-  // Payment form controllers
+  
   final _cardNumberController = TextEditingController();
   final _expiryController = TextEditingController();
   final _cvvController = TextEditingController();
@@ -259,7 +259,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Metode Pembayaran',
+            'Payment Method',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
@@ -282,7 +282,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 children: [
                   const Icon(Icons.account_balance),
                   const SizedBox(width: 12),
-                  const Expanded(child: Text("Transfer Bank")),
+                  const Expanded(child: Text("Bank Transfer")),
                   Icon(
                     Icons.arrow_drop_down,
                     color: _selectedPaymentMethod == PaymentMethod.bankTransfer
@@ -294,13 +294,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
 
-          // List bank muncul kalau Transfer Bank dipilih
+          
           if (_selectedPaymentMethod == PaymentMethod.bankTransfer)
             Padding(
               padding: const EdgeInsets.only(left: 16),
               child: Container(
                 constraints: BoxConstraints(
-                  maxHeight: 250, // batasi tinggi maksimal agar bisa discroll
+                  maxHeight: 250, 
                 ),
                 child: ListView(
                   shrinkWrap: true,
@@ -334,7 +334,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             ),
 
-          // Metode lain
+          
           ...[
             PaymentMethod.shopeePay,
             PaymentMethod.gopay,
@@ -494,7 +494,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 8),
             Text(_nameController.text),
             Text(_addressController.text),
-            Text('${_cityController.text}, ${_stateController.text} ${_zipController.text}'),
+            Text(_zipController.text),
             Text(_phoneController.text),
           ],
         ),
@@ -622,14 +622,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         );
       }
     } else if (_currentStep == 1) {
-      // Ganti validasi form dengan validasi payment method
+      
       if (_selectedPaymentMethod == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pilih metode pembayaran terlebih dahulu')),
         );
         return;
       }
-      // Jika bank transfer dipilih, pastikan bank juga dipilih
+      
       if (_selectedPaymentMethod == PaymentMethod.bankTransfer && _selectedBank == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pilih bank untuk transfer')),
@@ -657,7 +657,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    // Validate payment method
+    
     if (_selectedPaymentMethod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pilih metode pembayaran terlebih dahulu')),
@@ -672,7 +672,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    // Show loading dialog
+    
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -685,7 +685,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final shipping = cartProvider.totalAmount > 100 ? 0.0 : 9.99;
       final total = cartProvider.totalAmount + shipping;
 
-      // Prepare payment method string
+      
       String paymentMethodText = '';
       String? bankName;
       
@@ -721,7 +721,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           break;
       }
 
-      // Prepare shipping address
+      
       final shippingAddress = {
         'name': _nameController.text.trim(),
         'email': _emailController.text.trim(),
@@ -732,7 +732,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'zipCode': _zipController.text.trim(),
       };
 
-      // Create order in Firebase
       await orderProvider.createOrder(
         userId: authProvider.user!.id,
         items: cartProvider.items,
@@ -743,12 +742,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         shippingAddress: shippingAddress,
       );
 
-      Navigator.of(context).pop(); // Close loading dialog
+      Navigator.of(context).pop();
       
-      // Clear cart
       cartProvider.clearCart();
       
-      // Show success dialog
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -758,11 +755,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop();
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   '/home',
                   (route) => false,
-                ); // Go to home
+                );
               },
               child: const Text('OK'),
             ),
@@ -770,7 +767,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
       );
     } catch (e) {
-      Navigator.of(context).pop(); // Close loading dialog
+      Navigator.of(context).pop();
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal membuat pesanan: ${e.toString()}')),

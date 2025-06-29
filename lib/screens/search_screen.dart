@@ -168,32 +168,44 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
     );
   }
+  
+Widget _buildSearchResults() {
+  return Padding(
+    padding: const EdgeInsets.all(16),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        int crossAxisCount = (constraints.maxWidth ~/ 200).clamp(2, 4);
+        double itemWidth = constraints.maxWidth / crossAxisCount;
+        double itemHeight = itemWidth * 1.7;
+        double childAspectRatio = itemWidth / itemHeight;
 
-  Widget _buildSearchResults() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.7,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        final product = _searchResults[index];
-        return ProductCard(
-          product: product,
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              '/product-detail',
-              arguments: {'productId': product.id},
+        return GridView.builder(
+          itemCount: _searchResults.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemBuilder: (context, index) {
+            final product = _searchResults[index];
+            return ProductCard(
+              product: product,
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  '/product-detail',
+                  arguments: {'productId': product.id},
+                );
+              },
             );
           },
         );
       },
-    );
-  }
+    ),
+  );
+}
+
 
   void _performSearch(String query) {
     if (query.isEmpty) {
